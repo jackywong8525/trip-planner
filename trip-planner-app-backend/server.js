@@ -13,8 +13,9 @@ const { privateKey, auth } = require('./auth/auth.js');
 const User = require('./models/user.js');
 
 // Connecting to database
+require("dotenv").config();
 const mongoose = require('mongoose');
-const DB_URL = "mongodb+srv://jackywong8525:QQHKZ4DfbjPXI96R@tripplanner.kbfj5.mongodb.net/userInfo?retryWrites=true&w=majority&appName=tripPlanner";
+const DB_URL = process.env.DB_URL;
 
 mongoose.connect(DB_URL).catch((error) => {
     console.log(error.message);
