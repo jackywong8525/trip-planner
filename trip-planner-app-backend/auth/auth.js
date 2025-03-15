@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const privateKey = process.env.PRIVATE_KEY;
 
 const auth = (req, res, next) => {

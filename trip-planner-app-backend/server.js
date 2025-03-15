@@ -147,16 +147,15 @@ app.post('/add-trip/add-people', async (req, res) => {
 
     try {
 
-        const userList = await User.find({"username" : new RegExp(username, 'i')});
+        const requestedUser = await jwt.verify(token, privateKey);
 
-        const requestedUser = jwt.verify(token, privateKey);
+        const userList = await User.find({$and:[
+            {"username" : new RegExp(username, 'i')},
+            {"_id" : { $ne: requestedUser.userId }}
+        ]});
 
-        console.log(requestedUser._id);
 
         const formattedUserList = userList
-        .filter((user) => {
-            return user._id !== requestedUser._id;
-        })
         .map((user) => {
             return {
                 lastName: user.lastName,
