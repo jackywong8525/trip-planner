@@ -1,0 +1,93 @@
+/* || RESET */
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* || VARIABLES */
+
+:root {
+    /* || FONT */
+    --FF: "DM Sans", sans-serif;
+    /* --FONT-H1: bold 1.6rem/64px var(--FF);
+    --FONT-H2: bold 1.4rem/36px var(--FF);   */
+
+    /* || COLORS */
+    --MAIN-THEME-COLOR: #023444;
+    --SUPP-THEME-COLOR-DARK: #005b7a;
+    --SUPP-THEME-COLOR-LIGHT: #4f6364;
+    --SUPP-THEME-COLOR-EXTRALIGHT: #AFDDE5;
+    --BACKUP-COLOR-LIGHT: aliceblue;
+
+    --DEFAULT-BUTTON-COLOR: #56a264;
+    --CAUTIOUS-BUTTON-COLOR: #c43232;
+    --NORMAL-BUTTON-COLOR: aliceblue;
+
+    --MAIN-FONT-COLOR: #56a264;
+    --SUPP-FONT-COLOR-DARK: var(--MAIN-THEME-COLOR);
+    --SUPP-FONT-COLOR-LIGHT: aliceblue;
+    --CAUTION-FONT-COLOR: #c43232;
+    --CAUTION-FONT-COLOR-LIGHT: #ff7777;
+
+    --GENERAL-BORDER-COLOR: var(--MAIN-THEME-COLOR);
+    --SUPP-BORDER-COLOR: var(--BACKUP-COLOR-LIGHT);
+    --CAUTION-BORDER-COLOR: #c43232;
+    --FORM-INPUT-BORDER-COLOR: #56a264;
+    --FORM-INPUT-CAUTION-BORDER-COLOR: var(--CAUTION-BORDER-COLOR);
+    --SHADOW-COLOR: var(--MAIN-THEME-COLOR);
+
+    /* Link Decoration */
+    --LINK-FONT-STYLE: italic;
+    --LINK-CURSOR: pointer;
+
+    /* || BORDERS */
+    --GENERAL-BORDER: 1px solid var(--GENERAL-BORDER-COLOR);
+    --FORM-INPUT-BORDER: 3px solid var(--FORM-INPUT-BORDER-COLOR);
+    --FORM-INPUT-CAUTION-BORDER: 3px solid var(--FORM-INPUT-CAUTION-BORDER-COLOR);
+    
+    /* || SHADOW */
+    --GENERAL-SHADOW: 1px 1px 10px var(--SHADOW-COLOR);
+
+    /* || BUTTON */
+    --BUTTON-BORDER: var(--GENERAL-BORDER);
+    --BUTTON-BORDER-RADIUS: 5px;
+    --BUTTON-HEIGHT: 40px;
+    --BUTTON-PADDING: 5px;
+    --BUTTON-HOVER-FILTER: brightness(85%);
+    --BUTTON-HOVER-CURSOR: pointer;
+
+    /* || TRANSITION */
+    /* --BORDER-TRANSITION: border 0.1s ease-in-out; */
+}
+
+
+/* || GLOBAL */
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    font-family: var(--FF);
+}
+
+/* || UTILITY CLASS */
+
+.center {
+    text-align: center;
+}
+
+.left {
+    text-align: left;
+}
+
+.right {
+    text-align: right;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
