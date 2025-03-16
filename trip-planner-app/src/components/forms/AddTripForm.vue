@@ -78,9 +78,19 @@
                         :name="user.lastName + ' ' + user.firstName"
                         :description="user.username"
                         :index="index"
+
+                        :update-event="'people-updated'"
                     >
                     </SearchDropDown>
                     <p v-if="!filteredUsers.length">No users found</p>
+                </div>
+                <div
+                    class="people-list">
+                    <PersonLabel
+                        v-for="(username, index) in people"
+                        :username="username"
+                        >
+                    </PersonLabel>
                 </div>
             </div>
 
@@ -139,6 +149,7 @@ $bus.$on('start-date-updated', updateTripStartDate);
 $bus.$on('end-date-updated', updateTripEndDate);
 
 $bus.$on('username-updated', updateUsername);
+$bus.$on('people-updated', updatePeople);
 
 function updateTripName(data) {
     tripName.value = data;
@@ -166,6 +177,11 @@ function updateUsername(data) {
     }, 300);
 
     console.log(filteredUsers.value);
+}
+
+function updatePeople(data) {
+    people.value.push(data.name);
+    updateUsername('');
 }
 
 function closeAddTripForm() {

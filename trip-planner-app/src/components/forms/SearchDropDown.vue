@@ -1,5 +1,5 @@
 <template>
-    <div class="dropdown-item">
+    <div class="dropdown-item" @click.prevent="clickDropdownItem">
         <img 
             class="dropdown-item-image"
             src="/icons/user-icon.png"    
@@ -11,9 +11,18 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, inject } from 'vue';
 
-const props = defineProps(['name',  'description', 'index']);
+const $bus = inject('$bus');
+const props = defineProps(['name',  'description', 'index', 'updateEvent']);
+
+function clickDropdownItem() {
+    $bus.$emit(props.updateEvent.value, {
+        name: props.name.value,
+        description: props.description.value,
+        index: props.index.value
+    });
+}
 </script>
 
 <style>
