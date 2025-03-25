@@ -29,6 +29,7 @@ export default {
     inject: ['$bus'],
     created() {
         this.$bus.$on('form-submitted', this.toggleSubmitted);
+        this.$bus.$on('reset-input', this.resetInputValue);
     },
     data() {
         return {
@@ -45,6 +46,9 @@ export default {
         },
         toggleSubmitted(submitted){
             this.submitted = submitted;
+        },
+        resetInputValue(){
+            this.inputValue = '';
         }
     },
     computed: {

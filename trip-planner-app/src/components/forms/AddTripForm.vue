@@ -78,6 +78,7 @@
                         :name="user.lastName + ' ' + user.firstName"
                         :description="user.username"
                         :index="index"
+                        :clicked-names="people"
 
                         :update-event="'people-updated'"
                     >
@@ -87,8 +88,8 @@
                 <div
                     class="people-list">
                     <PersonLabel
-                        v-for="(username, index) in people"
-                        :username="username"
+                        v-for="(person, index) in people"
+                        :text="person.name"
                         >
                     </PersonLabel>
                 </div>
@@ -101,12 +102,12 @@
             </Subheader>
 
             <div class="share-schedule-input">
-                <input type="checkbox">
+                <input type="checkbox" class="share-schedule-checkbox">
                 <span>Share the schedule to all the people in this trip</span>
             </div>
 
             <div class="share-checklist-input">
-                <input type="checkbox">
+                <input type="checkbox" class="share-checklist-checkbox">
                 <span>Share the checklist to all the people in this trip</span>
             </div>
 
@@ -127,6 +128,7 @@
 import FormInput from './FormInput.vue';
 import Subheader from '../subheader/Subheader.vue';
 import SearchDropDown from './SearchDropDown.vue';
+import PersonLabel from './PersonLabel.vue';
 import { ref, inject } from 'vue';
 import AuthService from '@/auth/AuthService';
 
@@ -180,8 +182,12 @@ function updateUsername(data) {
 }
 
 function updatePeople(data) {
-    people.value.push(data.name);
+    people.value.push({
+        name: data.name,
+        username: data.description
+    });
     updateUsername('');
+    $bus.$emit('reset-input');
 }
 
 function closeAddTripForm() {
@@ -198,7 +204,7 @@ async function updateFilteredUsers() {
 
     const API_URL = "http://localhost:5000";
 
-    const response = await fetch(API_URL + '/add-trip/add-people', {
+    const response = await fetch(API_URL + '/main/trip/add-trip/add-people', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
@@ -401,10 +407,25 @@ function submitForm() {
 
 .share-schedule-input {
     grid-area: share-schedule-input;
+    padding: 5px;
+    margin: 0px 5px;
+}
+
+.share-schedule-checkbox {
+    padding: 5px;
+    margin: 0px 5px;
+    
 }
 
 .share-checklist-input {
     grid-area: share-checklist-input;
+    padding: 5px;
+    margin: 0px 5px;
+}
+
+.share-checklist-checkbox {
+    padding: 5px;
+    margin: 0px 5px;
 }
 
 .submit-button {
@@ -476,6 +497,14 @@ function submitForm() {
     margin: 0px 10px;
     background-color: var(--SUPP-THEME-COLOR-LIGHT);
     border-radius: 10px;
+}
+
+.people-list {
+    padding: 10px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 </style>

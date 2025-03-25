@@ -2,7 +2,7 @@ const API_URL = "http://localhost:5000";
 
 class AuthService {
     async login(username, password){
-        const response = await fetch(API_URL, {
+        const response = await fetch(API_URL + '/auth/login', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
@@ -30,7 +30,7 @@ class AuthService {
     }
 
     async register(user){
-        const response = await fetch(API_URL + '/register', {
+        const response = await fetch(API_URL + '/auth/register', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
