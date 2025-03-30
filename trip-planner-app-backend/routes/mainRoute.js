@@ -3,12 +3,12 @@ const router = express.Router();
 
 const {mainAccess} = require('../controllers/mainAppController');
 const tripRoute = require('./tripRoute');
-const checklistRoute = require('./checklistRoute');
+const { auth } = require('../auth/auth.js');
 
+router.use(auth);
 router.use('/trip', tripRoute);
-router.use('/checklist', checklistRoute);
 
 // Main Access
-router.route('/').get(mainAccess);
+router.route('/').post(mainAccess);
 
 module.exports = router;

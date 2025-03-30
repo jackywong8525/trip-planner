@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
 
-const {addTrip} = require('../controllers/tripController');
+const {findUsers, addTrip, deleteTrip} = require('../controllers/tripController');
 const scheduleRoute = require('../routes/scheduleRoute.js');
+const checklistRoute = require('./checklistRoute');
 
 router.use('/schedule', scheduleRoute);
-router.route('/add-trip/add-people').post(addTrip);
+router.use('/checklist', checklistRoute);
+
+router.route('/add-trip').post(addTrip);
+router.route('/delete-trip').delete(deleteTrip);
+router.route('/add-trip/add-people').post(findUsers);
 
 module.exports = router;

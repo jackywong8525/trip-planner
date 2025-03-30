@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const tripSchema = new Schema({
+    ownerId: String,
     name: String,
     location: String,    
     startDate: Date,
     endDate: Date,
     people: Array,
-    isScheduleShared: Boolean,
     isChecklistShared: Boolean
 }, { timestamps: true });
 

@@ -1,20 +1,35 @@
 require("dotenv").config();
-
+const jwt = require('jsonwebtoken');
+const User = require('../models/user.js');
 const privateKey = process.env.PRIVATE_KEY;
 
-const auth = (req, res, next) => {
+const auth = async (req, res, next) => {
     const token = req.header('Authorization').replace('Bearer ', '');
 
     try {
-        const decoded = JsonWebTokenError.verify(token, privateKey);
+        const decoded = jwt.verify(token, privateKey);
         req.user = decoded;
-        next();
-    }
+        
+        const user = await User.findById(decoded.userId);
 
-    catch {
+        if(user){
+            return next();
+        }
+
         res.status(401).json({
             success: false,
-            message: 'Unauthorized'
+            message: 'Unauthorized',
+            error: error
+        })
+    }
+
+    catch(error) {
+        console.log(error);
+
+        res.status(401).json({
+            success: false,
+            message: 'Unauthorized',
+            error: error
         });
     }
 }

@@ -101,11 +101,6 @@
             >
             </Subheader>
 
-            <div class="share-schedule-input">
-                <input type="checkbox" class="share-schedule-checkbox">
-                <span>Share the schedule to all the people in this trip</span>
-            </div>
-
             <div class="share-checklist-input">
                 <input type="checkbox" class="share-checklist-checkbox">
                 <span>Share the checklist to all the people in this trip</span>
@@ -207,7 +202,8 @@ async function updateFilteredUsers() {
     const response = await fetch(API_URL + '/main/trip/add-trip/add-people', {
         method: 'POST',
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getCurrentUser()}`
         },
         body: JSON.stringify({
             username: usernameFilter.value,
@@ -217,7 +213,7 @@ async function updateFilteredUsers() {
 
     const responseObj = await response.json();
 
-    if(responseObj) {    
+    if(responseObj && responseObj.userList) {    
         filteredUsers.value = responseObj.userList;  
     }
 
@@ -324,7 +320,6 @@ function submitForm() {
         "people-header people-header"
         "trip-people-input trip-people-input"
         "other-settings-header other-settings-header"
-        "share-schedule-input share-schedule-input"
         "share-checklist-input share-checklist-input"
         ". ."
         "submit-button submit-button"
@@ -369,7 +364,6 @@ function submitForm() {
 .trip-start-date-input,
 .trip-end-date-input,
 .trip-people-input,
-.share-schedule-input,
 .share-checklist-input {
     padding: 5px;
 }
@@ -403,18 +397,6 @@ function submitForm() {
 
 .other-settings-header {
     grid-area: other-settings-header;
-}
-
-.share-schedule-input {
-    grid-area: share-schedule-input;
-    padding: 5px;
-    margin: 0px 5px;
-}
-
-.share-schedule-checkbox {
-    padding: 5px;
-    margin: 0px 5px;
-    
 }
 
 .share-checklist-input {
