@@ -30,18 +30,25 @@
         <Subheader 
             :subheader-content="'My Trips'">
         </Subheader>
+
+        <div class="trip-container">
+            <TripCard
+                v-for="(trip, index) in trips"
+                :trip="trip"
+            >
+            </TripCard>
+        </div>
     </div>
 
     <AddTripForm v-if="showAddTripForm"></AddTripForm>
     
-
-
 </template>
 
 <script setup>
 import CardButton from '@/components/cards/CardButton.vue';
 import Subheader from '@/components/subheader/Subheader.vue';
 import AddTripForm from '@/components/forms/AddTripForm.vue';
+import TripCard from '@/components/cards/TripCard.vue';
 import { ref, inject } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -49,9 +56,10 @@ const router = useRouter();
 const $bus = inject('$bus');
 
 const showAddTripForm = ref(false);
+const trips = ref([]);
+
 
 $bus.$on('close-add-trip-form', toggleAddTripForm);
-
 
 function toggleAddTripForm(){
     showAddTripForm.value = !showAddTripForm.value;
@@ -76,6 +84,8 @@ function toggleAddTripForm(){
     flex-wrap: wrap;
 }
 
-
+.trip-container {
+    min-height: 500px;
+}
 
 </style>

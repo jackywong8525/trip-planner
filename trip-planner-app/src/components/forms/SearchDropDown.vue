@@ -7,8 +7,8 @@
             class="dropdown-item-image"
             src="/icons/user-icon.png"    
         >
-        <div class="dropdown-item-name">{{ props.name }}</div>
-        <div class="dropdown-item-description">{{ props.description }}</div>
+        <div class="dropdown-item-name">{{ props.user.firstName + ' ' + props.user.lastName }}</div>
+        <div class="dropdown-item-description">{{ props.user.username }}</div>
 </button>
 
 </template>
@@ -17,21 +17,18 @@
 import { ref, defineProps, inject, computed } from 'vue';
 
 const $bus = inject('$bus');
-const props = defineProps(['name',  'description', 'index', 'updateEvent', 'clickedNames']);
+const props = defineProps(['user', 'index', 'updateEvent', 'clickedNames']);
 
 function clickDropdownItem() {
     $bus.$emit(props.updateEvent, {
-        name: props.name,
-        description: props.description,
         index: props.index
     });
-    console.log(props.clickedNames, props.description);
 }
 
 const dropdownDisabled = computed(() => {
     return props.clickedNames.some((object) => {
 
-        if(object.username === props.description){
+        if(object.username === props.user.username){
             return true;
         }
     })
@@ -43,9 +40,9 @@ const dropdownDisabled = computed(() => {
 <style>
 .dropdown-item {
     /* Box and Size Properties */
-    height: 50px;
     width: 100%;
     margin: 5px 0px;
+    padding: 2px 0px;
 
     /* Color */
     background-color: white;
@@ -88,13 +85,15 @@ const dropdownDisabled = computed(() => {
 
 .dropdown-item-name {
     grid-area: dropdown-item-name;
+    font-size: 0.9rem;
     text-align: left;
+    padding-top: 5px;
     
 }
 
 .dropdown-item-description {
     grid-area: dropdown-item-description;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     text-align: left;
 }
 </style>

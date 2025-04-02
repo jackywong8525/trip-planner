@@ -22,6 +22,7 @@
                     :type-of-input="'text'"
                     :input-label="'Trip Name'"
                     :update-event="'trip-name-updated'"
+                    :validation="tripNameValidation"
                 >
                 </FormInput>
             </div>
@@ -32,6 +33,7 @@
                     :type-of-input="'text'"
                     :input-label="'Location'"
                     :update-event="'location-updated'"
+                    :validation="tripLocationValidation"
                 >
                 </FormInput>
             </div>
@@ -42,6 +44,7 @@
                     :type-of-input="'date'"
                     :input-label="'Start Date'"
                     :update-event="'start-date-updated'"
+                    :validation="tripStartDateValidation"
                 >
                 </FormInput>
             </div>
@@ -52,6 +55,7 @@
                     :type-of-input="'date'"
                     :input-label="'End Date'"
                     :update-event="'end-date-updated'"
+                    :validation="tripEndDateValidation"
                 >
                 </FormInput>
             </div>
@@ -75,11 +79,9 @@
                     v-if="userSearched">
                     <SearchDropDown
                         v-for="(user, index) in filteredUsers"
-                        :name="user.lastName + ' ' + user.firstName"
-                        :description="user.username"
+                        :user="user"
                         :index="index"
                         :clicked-names="people"
-
                         :update-event="'people-updated'"
                     >
                     </SearchDropDown>
@@ -89,7 +91,7 @@
                     class="people-list">
                     <PersonLabel
                         v-for="(person, index) in people"
-                        :text="person.name"
+                        :text="person.lastName + ' ' + person.firstName"
                         >
                     </PersonLabel>
                 </div>
@@ -102,14 +104,25 @@
             </Subheader>
 
             <div class="share-checklist-input">
-                <input type="checkbox" class="share-checklist-checkbox">
+                <input type="checkbox" class="share-checklist-checkbox"
+                v-model="isChecklistShared">
                 <span>Share the checklist to all the people in this trip</span>
+            </div>
+
+            <div 
+                v-if="!submitStatus && submitAttempted"
+                class="submit-msg-section">
+                <img 
+                    src="/icons/caution-icon.png"
+                    class="submit-msg-icon">
+                <p class="submit-msg center">{{ submitMessage }}</p>
             </div>
 
             <div class="submit-button">
                 <button 
                     class="add-trip-submit-button"
                     @click.prevent="submitForm"
+                    :disabled="submitted"
                     >
                     Submit
                 </button>
@@ -124,8 +137,10 @@ import FormInput from './FormInput.vue';
 import Subheader from '../subheader/Subheader.vue';
 import SearchDropDown from './SearchDropDown.vue';
 import PersonLabel from './PersonLabel.vue';
-import { ref, inject } from 'vue';
+import { ref, inject, computed } from 'vue';
 import AuthService from '@/auth/AuthService';
+import { InputValidation, alphabets } from '@/utils/inputValidation';
+import { API_URL } from '@/utils/backendConnection';
 
 const $bus = inject('$bus');
 
@@ -134,12 +149,72 @@ const tripName = ref('');
 const tripLocation = ref('');
 const tripStartDate = ref();
 const tripEndDate = ref();
-
 const usernameFilter = ref('');
-let filteredUsers = ref([]);
-let userSearched = ref(false);
-let people = ref([]);
+const filteredUsers = ref([]);
+const userSearched = ref(false);
+const people = ref([]);
+const isChecklistShared = ref(false);
+const submitAttempted = ref(false);
+const submitStatus = ref(false);
+const submitMessage = ref('');
+const submitted = ref(false);
 
+// Computed Properties
+const tripNameValidation = computed(() =>{
+    return [
+        new InputValidation((tripName) => {
+            return tripName !== '';
+        }, 'Trip Name is required.'),
+        new InputValidation((tripName) => {
+            return tripName.length >= 2 
+                    && tripName.length <= 20
+                    && alphabets.test(tripName);
+        }, 'Trip Name should be in 2 to 20 characters.')
+    ];
+});
+
+const tripLocationValidation = computed(() => {
+    return [
+        new InputValidation((location) => {
+            return location !== '';
+        }, 'Location is required.'),
+        new InputValidation((location) => {
+            return alphabets.test(location);
+        }, 'Location should consist only alphabets.')
+    ]
+});
+
+const tripStartDateValidation = computed(() => {
+    return [
+        new InputValidation((startDate) => {
+            return startDate !== '';
+        }, 'Start Date is required.'),
+        new InputValidation((startDate) => {
+
+            const today = new Date().toISOString().slice(0, 10);
+
+            return Number(startDate.slice(0, 4)) >= Number(today.slice(0, 4))
+                    && Number(startDate.slice(5, 7)) >= Number(today.slice(5, 7))
+                    && Number(startDate.slice(8, 10)) >= Number(today.slice(8, 10));
+        }, 'Start Date must be no earlier than today.')
+    ]
+});
+
+const tripEndDateValidation = computed(() => {
+    return [
+        new InputValidation((endDate) => {
+            return endDate !== '';
+        }, 'End Date is required.'),
+        new InputValidation((endDate) => {
+
+            return Number(endDate.slice(0, 4)) >= Number(tripStartDate.value.slice(0, 4))
+                    && Number(endDate.slice(5, 7)) >= Number(tripStartDate.value.slice(5, 7))
+                    && Number(endDate.slice(8, 10)) >= Number(tripStartDate.value.slice(8, 10));
+        }, 'End Date must be no earlier than startDate.')
+    ]
+});
+
+// Event listeners for input values
 $bus.$on('trip-name-updated', updateTripName);
 $bus.$on('location-updated', updateTripLocation);
 $bus.$on('start-date-updated', updateTripStartDate);
@@ -177,16 +252,10 @@ function updateUsername(data) {
 }
 
 function updatePeople(data) {
-    people.value.push({
-        name: data.name,
-        username: data.description
-    });
+
+    people.value.push(filteredUsers.value[data.index]);
     updateUsername('');
     $bus.$emit('reset-input');
-}
-
-function closeAddTripForm() {
-    $bus.$emit('close-add-trip-form', null);
 }
 
 async function updateFilteredUsers() {
@@ -222,15 +291,97 @@ async function updateFilteredUsers() {
     return;
 }
 
-function submitForm() {
+function validateFormInfo() {
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    if(tripName.value === '' || tripLocation.value === '' || tripStartDate.value === '' || tripEndDate.value === '') {
+        submitMessage.value = "Trip name, location, start date and end date are required.";
+        return false;
+    }
+
+    else if(tripName.value.length < 2 || tripName.value.length > 20 || !alphabets.test(tripName.value)){
+        submitMessage.value = "Trip name should consist of 2 to 20 alphabets."
+        return false;
+    }
+
+    else if(!alphabets.test(tripLocation.value)){
+        submitMessage.value = 'Location should consist only alphabets.';
+        return false;
+    }
+
+    else if(Number(tripStartDate.value.slice(0, 4)) < Number(today.slice(0, 4))
+                    && Number(tripStartDate.value.slice(5, 7)) < Number(today.slice(5, 7))
+                    && Number(tripStartDate.value.slice(8, 10)) < Number(today.slice(8, 10))){
+
+        submitMessage.value = 'Start Date must be no earlier than today.';
+        return false;          
+    }
+
+    else if(Number(tripStartDate.value.slice(0, 4)) > Number(tripEndDate.value.slice(0, 4))
+                    && Number(tripStartDate.value.slice(5, 7)) > Number(tripEndDate.value.slice(5, 7))
+                    && Number(tripStartDate.value.slice(8, 10)) > Number(tripEndDate.value.slice(8, 10))){
+
+        submitMessage.value = 'End Date must be no earlier than Start Date.';
+        return false;          
+    }
+
+    return true;
+
 
 }
 
+async function submitForm() {
+
+    submitted.value = true;
+    submitAttempted.value = true;
+
+    if(!validateFormInfo()){
+        submitted.value = false;
+        return;
+    }
+
+    const response = await fetch(API_URL + '/main/trip/add-trip', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getCurrentUser()}`
+        },
+        body: JSON.stringify({
+            name: tripName.value,
+            location: tripLocation.value,
+            startDate: tripStartDate.value,
+            endDate: tripEndDate.value,
+            people: people.value.map((person) =>{
+                return person.userId;
+            }),
+            isChecklistShared: isChecklistShared.value,
+            token: AuthService.getCurrentUser()
+        })
+    });
+
+    const responseObj = await response.json();
+
+    submitStatus.value = responseObj.success;
+    submitMessage.value = responseObj.message;
+    submitted.value = false;
+
+    if(submitStatus.value) {    
+        closeAddTripForm();
+    }
+     
+    return;
+
+}
+
+function closeAddTripForm() {
+    $bus.$emit('close-add-trip-form', null);
+}
 
 
 </script>
 
-<style>
+<style scoped>
 .add-trip-form-container {
     /* Display */
     position: absolute;
@@ -321,7 +472,7 @@ function submitForm() {
         "trip-people-input trip-people-input"
         "other-settings-header other-settings-header"
         "share-checklist-input share-checklist-input"
-        ". ."
+        "submit-msg-section submit-msg-section"
         "submit-button submit-button"
     ;
 
@@ -488,5 +639,29 @@ function submitForm() {
     flex-wrap: wrap;
     gap: 10px;
 }
+
+
+.submit-msg-section {
+    grid-area: submit-msg-section;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+
+    padding: 10px;
+}
+
+.submit-msg {
+    /* Font */
+    font-size: 0.8rem;
+    color: var(--CAUTION-FONT-COLOR);
+    font-weight: bolder
+}
+
+.submit-msg-icon {
+    width: 20px;
+}
+
 
 </style>

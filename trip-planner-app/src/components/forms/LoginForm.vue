@@ -31,6 +31,7 @@
             <button 
                 @click.prevent="login"
                 class="login-button"
+                :disabled="submitted"
             >
                 Login
             </button>
@@ -60,7 +61,7 @@ export default {
         return {
             username: '',
             password: '',
-            isSubmitted: false,
+            submitted: false,
             loginMessage: '',
             loginStatus: false,
             loginAttempted: false

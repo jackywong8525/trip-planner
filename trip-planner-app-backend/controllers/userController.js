@@ -20,6 +20,8 @@ const store = async (req, res, next) => {
         phone,
         username,
         password,
+        ownedTrips: [],
+        sharedTrips: []
       });
       const savedUser = await user.save();
       return res.json({
@@ -65,7 +67,9 @@ const register = async (req, res) => {
             email: email,
             phone: phone,
             username: username,
-            password: hashedPassword
+            password: hashedPassword,
+            ownedTrips: [],
+            sharedTrips: []
         });
 
         await user.save();

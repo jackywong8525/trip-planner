@@ -5,8 +5,8 @@ const tripSchema = new Schema({
     ownerId: String,
     name: String,
     location: String,    
-    startDate: Date,
-    endDate: Date,
+    startDate: String,
+    endDate: String,
     people: Array,
     isChecklistShared: Boolean
 }, { timestamps: true });

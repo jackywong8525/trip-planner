@@ -1,10 +1,13 @@
 <template>
     <div class="person-label">
-        <img 
-            class="person-label-image"
-            src="/icons/user-icon.png" 
-        >
-        <p class="person-label-text">{{ text }}</p>
+        <div class="person-label-content">
+            <img 
+                class="person-label-image"
+                src="/icons/user-icon.png" 
+            >
+            <p class="person-label-text">{{ text }}</p>
+        </div>
+        <div class="person-label-cancel-button">X</div>
     </div>
 </template>
 
@@ -27,13 +30,41 @@ const props = defineProps({
 
     box-shadow: var(--SMALL-ITEM-SHADOW);
 
+    display: grid;
+    grid-template-columns: 1fr 25px;
+
+    flex: 1;
+}
+
+.person-label-content {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
 
     flex: 1;
+}
 
+.person-label-cancel-button {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Border */
+    border-radius: 30px;
+
+    /* Transition */
+    transition: background-color 0.1s ease-in-out;
+
+    /* Others */
+    cursor: pointer;
+
+}
+
+.person-label-cancel-button:hover {
+    /* Color */
+    background-color: lightgrey;
 }
 
 .person-label-image {

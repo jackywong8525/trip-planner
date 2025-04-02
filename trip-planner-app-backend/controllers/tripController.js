@@ -15,15 +15,18 @@ const findUsers = async (req, res) => {
 
         const requestedUser = await jwt.verify(token, privateKey);
 
+        console.log(typeof requestedUser.userId);
+
         const userList = await User.find({$and:[
             {"username" : new RegExp(username, 'i')},
-            {"" : { $ne: requestedUser.userId }}
+            {"_id" : { $ne: requestedUser.userId }}
         ]});
 
 
         const formattedUserList = userList
         .map((user) => {
             return {
+                userId: user._id,
                 lastName: user.lastName,
                 firstName: user.firstName,
                 username: user.username
@@ -48,6 +51,19 @@ const findUsers = async (req, res) => {
 
 }
 
+const getTrip = async (req, res) => {
+    const { token } = req.body;
+
+    try {
+        const user = await jwt.verify(token, privateKey);
+
+        const trips = await Trip.find({ownerId: user.userId});
+
+    } catch(error) {
+
+    }
+}
+
 const addTrip = async (req, res) => {
     const { name, location, startDate, endDate, people, isChecklistShared, token } = req.body;
 
@@ -69,7 +85,7 @@ const addTrip = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            trip: trip
+            message: "Trip successfully added."
         });
 
     } catch(error) {
