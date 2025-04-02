@@ -221,7 +221,8 @@ $bus.$on('start-date-updated', updateTripStartDate);
 $bus.$on('end-date-updated', updateTripEndDate);
 
 $bus.$on('username-updated', updateUsername);
-$bus.$on('people-updated', updatePeople);
+$bus.$on('people-updated', addPeople);
+$bus.$on('delete-person-label', deletePeople)
 
 function updateTripName(data) {
     tripName.value = data;
@@ -251,11 +252,16 @@ function updateUsername(data) {
     console.log(filteredUsers.value);
 }
 
-function updatePeople(data) {
+function addPeople(data) {
 
     people.value.push(filteredUsers.value[data.index]);
     updateUsername('');
     $bus.$emit('reset-input');
+}
+
+function deletePeople(index) {
+    people.value.splice(index, 1);
+    console.log(people.value);
 }
 
 async function updateFilteredUsers() {
