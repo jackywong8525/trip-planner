@@ -1,5 +1,12 @@
 <template>
 
+    <Alert
+        v-if="alertEmitted"
+        :alert-type="alert.alertType"
+        :message="alert.message"
+        :is-visible="alertEmitted"
+    ></Alert>
+
     <div 
         :class="`main-page-container ${showAddTripForm ? 'blur' : ''}`"
         :inert="showAddTripForm"
@@ -49,6 +56,7 @@ import CardButton from '@/components/cards/CardButton.vue';
 import Subheader from '@/components/subheader/Subheader.vue';
 import AddTripForm from '@/components/forms/AddTripForm.vue';
 import TripCard from '@/components/cards/TripCard.vue';
+import Alert from '@/components/alert/Alert.vue';
 import { ref, inject } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -57,12 +65,33 @@ const $bus = inject('$bus');
 
 const showAddTripForm = ref(false);
 const trips = ref([]);
-
+const alertEmitted = ref(false);
+const alert = ref();
 
 $bus.$on('close-add-trip-form', toggleAddTripForm);
+$bus.$on('emit-alert', showAlert);
 
 function toggleAddTripForm(){
     showAddTripForm.value = !showAddTripForm.value;
+}
+
+function showAlert(alertObject){
+    alert.value = alertObject;
+    alertEmitted.value = true;
+
+    let alertTime;
+
+    if(alertTime){
+        clearTimeout(alertTime);
+    }
+    
+    alertTime = setTimeout(() => {
+        $bus.$emit('hide-alert');
+
+        setTimeout(() => {
+            alertEmitted.value = false;
+        }, 1000)
+    }, 10000);
 }
 
 </script>

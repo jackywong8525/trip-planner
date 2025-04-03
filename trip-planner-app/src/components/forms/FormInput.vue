@@ -29,7 +29,7 @@ export default {
     inject: ['$bus'],
     created() {
         this.$bus.$on('form-submitted', this.toggleSubmitted);
-        this.$bus.$on('reset-input', this.resetInputValue);
+        this.$bus.$on(`reset-input-${this.inputLabel}`, this.resetInputValue);
     },
     data() {
         return {

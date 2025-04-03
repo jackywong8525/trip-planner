@@ -140,8 +140,9 @@ import SearchDropDown from './SearchDropDown.vue';
 import PersonLabel from './PersonLabel.vue';
 import { ref, inject, computed } from 'vue';
 import AuthService from '@/auth/AuthService';
-import { InputValidation, alphabets } from '@/utils/inputValidation';
+import { InputValidation, alphabets, alphabetsAndDigits } from '@/utils/inputValidation';
 import { API_URL } from '@/utils/backendConnection';
+import { AlertType } from '@/utils/AlertType';
 
 const $bus = inject('$bus');
 
@@ -170,7 +171,7 @@ const tripNameValidation = computed(() =>{
             return tripName.length >= 2 
                     && tripName.length <= 20
                     && alphabets.test(tripName);
-        }, 'Trip Name should be in 2 to 20 characters.')
+        }, 'Trip Name should be in 2 to 20 alphabets.')
     ];
 });
 
@@ -194,9 +195,8 @@ const tripStartDateValidation = computed(() => {
 
             const today = new Date().toISOString().slice(0, 10);
 
-            return Number(startDate.slice(0, 4)) >= Number(today.slice(0, 4))
-                    && Number(startDate.slice(5, 7)) >= Number(today.slice(5, 7))
-                    && Number(startDate.slice(8, 10)) >= Number(today.slice(8, 10));
+            return Number(startDate.slice(0, 4))*10000 + Number(startDate.slice(5, 7))*100 + Number(startDate.slice(8, 10)) 
+                    >= Number(today.slice(0, 4))*10000 + Number(today.slice(5, 7))*100 + Number(today.slice(8, 10));
         }, 'Start Date must be no earlier than today.')
     ]
 });
@@ -208,9 +208,8 @@ const tripEndDateValidation = computed(() => {
         }, 'End Date is required.'),
         new InputValidation((endDate) => {
 
-            return Number(endDate.slice(0, 4)) >= Number(tripStartDate.value.slice(0, 4))
-                    && Number(endDate.slice(5, 7)) >= Number(tripStartDate.value.slice(5, 7))
-                    && Number(endDate.slice(8, 10)) >= Number(tripStartDate.value.slice(8, 10));
+            return Number(endDate.slice(0, 4))*10000 + Number(endDate.slice(5, 7))*100 + Number(endDate.slice(8, 10)) 
+                >= Number(tripStartDate.value.slice(0, 4))*10000 + Number(tripStartDate.value.slice(5, 7))*100 + Number(tripStartDate.value.slice(8, 10));
         }, 'End Date must be no earlier than the start date.')
     ]
 });
@@ -232,7 +231,6 @@ function updateTripLocation(data) {
     tripLocation.value = data;
 }
 function updateTripStartDate(data) {
-    console.log(data);
     tripStartDate.value = data;
 }
 function updateTripEndDate(data) {
@@ -255,7 +253,7 @@ function addPeople(data) {
 
     people.value.push(filteredUsers.value[data.index]);
     updateUsername('');
-    $bus.$emit('reset-input');
+    $bus.$emit('reset-input-Username');
 }
 
 function deletePeople(index) {
@@ -314,17 +312,15 @@ function validateFormInfo() {
         return false;
     }
 
-    else if(Number(tripStartDate.value.slice(0, 4)) < Number(today.slice(0, 4))
-                    && Number(tripStartDate.value.slice(5, 7)) < Number(today.slice(5, 7))
-                    && Number(tripStartDate.value.slice(8, 10)) < Number(today.slice(8, 10))){
+    else if(Number(tripStartDate.value.slice(0, 4))*10000 + Number(tripStartDate.value.slice(5, 7))*100 + Number(tripStartDate.value.slice(8, 10)) 
+                < Number(today.slice(0, 4))*10000 + Number(today.slice(5, 7))*100 + Number(today.slice(8, 10))){
 
         submitMessage.value = 'Start Date must be no earlier than today.';
         return false;          
     }
 
-    else if(Number(tripStartDate.value.slice(0, 4)) > Number(tripEndDate.value.slice(0, 4))
-                    && Number(tripStartDate.value.slice(5, 7)) > Number(tripEndDate.value.slice(5, 7))
-                    && Number(tripStartDate.value.slice(8, 10)) > Number(tripEndDate.value.slice(8, 10))){
+    else if(Number(tripEndDate.value.slice(0, 4))*10000 + Number(tripEndDate.value.slice(5, 7))*100 + Number(tripEndDate.value.slice(8, 10)) 
+                < Number(tripStartDate.value.slice(0, 4))*10000 + Number(tripStartDate.value.slice(5, 7))*100 + Number(tripStartDate.value.slice(8, 10))){
 
         submitMessage.value = 'End Date must be no earlier than the start date.';
         return false;          
@@ -371,6 +367,10 @@ async function submitForm() {
 
     if(submitStatus.value) {    
         closeAddTripForm();
+        $bus.$emit('emit-alert', {
+            alertType: AlertType.SUCCESS,
+            message: `${tripName.value} is successfully added.`
+        });
     }
 
     submitAttempted.value = true;
