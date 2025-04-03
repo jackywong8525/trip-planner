@@ -104,7 +104,7 @@ const login =  async (req, res) => {
         });
 
         if(!user){
-            return res.status(400).json({
+            return res.status(200).json({
                 success: false,
                 message: 'No such user exists. Please try again.'
             });
@@ -113,7 +113,7 @@ const login =  async (req, res) => {
         const isMatched = await bcrypt.compare(password, user.password);
 
         if(!isMatched){
-            return res.status(400).json({
+            return res.status(200).json({
                 success: false,
                 message: 'The password is wrong. Please try again.'
             });

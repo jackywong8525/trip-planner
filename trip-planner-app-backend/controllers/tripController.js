@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { privateKey, auth } = require('../auth/auth.js');
 
@@ -15,8 +16,6 @@ const findUsers = async (req, res) => {
 
         const requestedUser = await jwt.verify(token, privateKey);
 
-        console.log(typeof requestedUser.userId);
-
         const userList = await User.find({$and:[
             {"username" : new RegExp(username, 'i')},
             {"_id" : { $ne: requestedUser.userId }}
@@ -33,7 +32,6 @@ const findUsers = async (req, res) => {
             }
         });
 
-        console.log(formattedUserList);
 
         return res.status(200).json({
             success: true,
@@ -51,7 +49,7 @@ const findUsers = async (req, res) => {
 
 }
 
-const getTrip = async (req, res) => {
+const getOwnedTripsByUserId = async (req, res) => {
     const { token } = req.body;
 
     try {
@@ -59,13 +57,25 @@ const getTrip = async (req, res) => {
 
         const trips = await Trip.find({ownerId: user.userId});
 
-    } catch(error) {
+        return res.status(200).json({
+            success: true,
+            trips: trips,
+            message: "Trips retrieved successfully."
+        });
 
+    } catch(error) {
+        res.status(400).json({
+            success: false,
+            message: 'Can\'t get the trip due to some reasons. Please try again.',
+        });
     }
 }
 
 const addTrip = async (req, res) => {
     const { name, location, startDate, endDate, people, isChecklistShared, token } = req.body;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
 
@@ -81,7 +91,30 @@ const addTrip = async (req, res) => {
             isChecklistShared: isChecklistShared
         });
 
-        await trip.save();
+        await trip.save({ session });
+
+        await User.findByIdAndUpdate(
+            owner._id,
+            { $push: {ownedTrips: trip._id} },
+            { 
+                new: true,
+                session
+            }
+        )
+
+        await Promise.all(
+            people.map(async (personId) => {
+                await User.findByIdAndUpdate(
+                    personId,
+                    { $push: { sharedTrips: trip._id } },
+                    { session }
+                );
+            })
+        );
+
+        await session.commitTransaction();
+        session.endSession();
+      
 
         return res.status(200).json({
             success: true,
@@ -89,6 +122,10 @@ const addTrip = async (req, res) => {
         });
 
     } catch(error) {
+
+        await session.abortTransaction();
+        session.endSession();
+
         console.log('Request Failed');
         console.log(error.message);
         res.status(400).json({
@@ -99,10 +136,48 @@ const addTrip = async (req, res) => {
 }
 
 const deleteTrip = async (req, res) => {
-    const {tripId} = req.body;
+    const {token, tripId} = req.body;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try{
-        await Trip.findOneAndDelete({ _id: tripId });
+        const user = await jwt.verify(token, privateKey);
+
+        const trip = Trip.findById(tripId);
+        const { ownerId, people } = trip;
+
+        if(ownerId !== user.userId){
+            return res.status(400).json({
+                success: false,
+                message: 'Can\'t delete the trip that is not owned by the user.',
+            });
+        }
+
+        await Trip.findByIdAndDelete(tripId, {session});
+
+        await User.findByIdAndUpdate(
+            ownerId,
+            {
+                $pull: {
+                    ownedTrips: { $in: tripId }
+                }
+            },
+            { session }
+        )
+
+        await Promise.all(
+            people.map(async (personId) => {
+                await User.findByIdAndUpdate(
+                    personId,
+                    { $pull: { sharedTrips: tripId } },
+                    { session }
+                );
+            })
+        );
+
+        await session.commitTransaction();
+        session.endSession();
 
         return res.status(200).json({
             success: true,
@@ -110,6 +185,11 @@ const deleteTrip = async (req, res) => {
         });
 
     } catch {
+        await session.abortTransaction();
+        session.endSession();
+
+        console.log(error.message);
+
         res.status(400).json({
             success: false,
             message: 'Can\'t delete the trip due to some reasons. Please try again.',

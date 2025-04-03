@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const tripSchema = new Schema({
-    ownerId: String,
+    ownerId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'User' 
+    },
     name: String,
     location: String,    
     startDate: String,

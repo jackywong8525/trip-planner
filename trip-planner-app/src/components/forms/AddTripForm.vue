@@ -92,6 +92,7 @@
                     <PersonLabel
                         v-for="(person, index) in people"
                         :text="person.lastName + ' ' + person.firstName"
+                        :index="index"
                         >
                     </PersonLabel>
                 </div>
@@ -210,7 +211,7 @@ const tripEndDateValidation = computed(() => {
             return Number(endDate.slice(0, 4)) >= Number(tripStartDate.value.slice(0, 4))
                     && Number(endDate.slice(5, 7)) >= Number(tripStartDate.value.slice(5, 7))
                     && Number(endDate.slice(8, 10)) >= Number(tripStartDate.value.slice(8, 10));
-        }, 'End Date must be no earlier than startDate.')
+        }, 'End Date must be no earlier than the start date.')
     ]
 });
 
@@ -248,8 +249,6 @@ function updateUsername(data) {
     debounceTimer = setTimeout(() => {
         updateFilteredUsers();
     }, 300);
-
-    console.log(filteredUsers.value);
 }
 
 function addPeople(data) {
@@ -261,7 +260,6 @@ function addPeople(data) {
 
 function deletePeople(index) {
     people.value.splice(index, 1);
-    console.log(people.value);
 }
 
 async function updateFilteredUsers() {
@@ -328,7 +326,7 @@ function validateFormInfo() {
                     && Number(tripStartDate.value.slice(5, 7)) > Number(tripEndDate.value.slice(5, 7))
                     && Number(tripStartDate.value.slice(8, 10)) > Number(tripEndDate.value.slice(8, 10))){
 
-        submitMessage.value = 'End Date must be no earlier than Start Date.';
+        submitMessage.value = 'End Date must be no earlier than the start date.';
         return false;          
     }
 
@@ -340,7 +338,6 @@ function validateFormInfo() {
 async function submitForm() {
 
     submitted.value = true;
-    submitAttempted.value = true;
 
     if(!validateFormInfo()){
         submitted.value = false;
@@ -375,6 +372,8 @@ async function submitForm() {
     if(submitStatus.value) {    
         closeAddTripForm();
     }
+
+    submitAttempted.value = true;
      
     return;
 

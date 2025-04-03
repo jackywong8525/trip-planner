@@ -171,8 +171,6 @@ export default {
 
             this.toggleSubmitted(true);
 
-            this.registerAttempted = true;
-
             if(!this.validateRegisterInfo()){
                 this.toggleSubmitted(false);
                 this.registerAttempted = true;
@@ -193,8 +191,10 @@ export default {
             this.registerStatus = responseObj.success;
             this.registerMessage = responseObj.message;
 
-            this.registerAttempted = true;
-
+            if(!this.registerStatus){
+                this.registerAttempted = true;
+            }
+            
             this.toggleSubmitted(false);
         },
         validateRegisterInfo() {
@@ -465,13 +465,15 @@ export default {
 }
 
 .register-success-icon {
-    width: 100px;
+    width: 75px;
+    margin: 25px 10px 10px 10px;
 }
 
 .register-success-msg {
     font-size: 1.4rem;
     color: var(--MAIN-FONT-COLOR);
     font-weight: bolder;
+    padding: 10px
 }
 
 .register-msg-section {

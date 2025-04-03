@@ -4,9 +4,18 @@ const Schema = mongoose.Schema;
 const ItemStatus = require('../objects/ItemStatus.js')
 
 const tripCheckItemSchema = new Schema({
-    checkItemId: String,
-    tripId: String,
-    userId: String,
+    checkItemId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'CheckItem' 
+    },
+    tripId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'Trip' 
+    },
+    userId: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'User' 
+    },
     deadline: Date,     
     itemStatus: ItemStatus
 }, { timestamps: true });
