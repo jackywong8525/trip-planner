@@ -54,8 +54,9 @@
 
         <div class="shared-trips-container">
             <TripCard
-                v-for="(trip, index) in sharedTrips"
-                :trip="trip"
+                v-for="(tripObj, index) in sharedTrips"
+                :trip="tripObj.trip"
+                :isPending="tripObj.isPending"
                 :active-user="activeUser"
                 :is-owner="false"
             >
@@ -86,7 +87,7 @@ const ownedTrips = ref([]);
 const sharedTrips = ref([]);
 const alertEmitted = ref(false);
 const alert = ref();
-const activeUser = ref();
+const activeUser = ref({});
 
 $bus.$on('close-add-trip-form', toggleAddTripForm);
 $bus.$on('emit-alert', showAlert);
@@ -145,6 +146,8 @@ async function getSharedTrips() {
 
     const responseObj = await response.json();
 
+    console.log(responseObj);
+
     sharedTrips.value = responseObj.trips;
 }
 
@@ -190,16 +193,12 @@ function showAlert(alertObject){
     flex-wrap: wrap;
 }
 
-.owned-trips-container {
+.owned-trips-container, .shared-trips-container {
     min-height: 500px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1rem;
 
-}
-
-.shared-trips-container {
-    min-height: 500px;
 }
 
 </style>

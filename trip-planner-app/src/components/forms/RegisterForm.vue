@@ -181,7 +181,7 @@ export default {
                 lastName: this.lastName,
                 firstName: this.firstName,
                 email: this.email,
-                phoneNumber: this.phoneNumber,
+                phone: this.phoneNumber,
                 username: this.username,
                 password: this.password
             }

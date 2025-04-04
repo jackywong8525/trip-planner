@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import AuthService from '@/auth/AuthService';
 import HomeView from '@/views/HomeView.vue';
 import TripPlannerMain from '@/views/TripPlannerMain.vue';
 import RegisterView from '@/views/RegisterView.vue';
-import AddTripForm from '@/components/forms/AddTripForm.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +11,9 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView
+      // redirect: (to) => {
+      //   return AuthService.getCurrentUser() !== undefined ? '/main' : '/';
+      // }  
     },
     {
       path: '/home',

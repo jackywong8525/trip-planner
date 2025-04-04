@@ -34,6 +34,24 @@
                     {{ tripPeopleString }}
                 </div>
             </div>
+            <div 
+                class="shared-trip-permission"
+                v-if="!props.isOwner && props.isPending">
+                    <button 
+                        class="shared-trip-accept-button">
+                        <img 
+                            src="/icons/tick-icon.png"
+                            class="shared-trip-accept-button-icon">
+                        Accept
+                    </button>
+                    <button
+                        class="shared-trip-decline-button">
+                        <img 
+                            src="/icons/cross-icon.png"
+                            class="shared-trip-decline-button-icon">
+                        Decline
+                    </button>
+            </div>
         </div>
     </div>
 </template>
@@ -55,11 +73,15 @@ const props = defineProps({
     activeUser: {
         type: Object,
         required: true
+    },
+    isPending: {
+        type: Boolean,
+        required: false
     }
 });
 
 // Data Variables
-const tripOwner = ref();
+const tripOwner = ref({});
 const tripPeople = ref(['you']);
 
 // Computed Properties
@@ -101,7 +123,7 @@ async function loadTripPeople() {
 async function loadTripOwner() {
 
     if(props.isOwner){
-        tripOwner.value = activeUser.value;
+        tripOwner.value = props.activeUser;
         return;
     }
 
@@ -122,8 +144,8 @@ async function loadTripOwner() {
 }
 
 onMounted(async () => {
-    loadTripOwner();
-    loadTripPeople();
+    await loadTripOwner();
+    await loadTripPeople();
 });
 
 
@@ -187,6 +209,45 @@ onMounted(async () => {
 
 .trip-date-range, .trip-people-list, .trip-location-text {
     margin: 5px;
+}
+
+.shared-trip-permission {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.shared-trip-accept-button,
+.shared-trip-decline-button {
+    height: 40px;
+    width: 150px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border: 0px;
+
+    color: var(--SUPP-FONT-COLOR-LIGHT);
+}
+
+.shared-trip-accept-button-icon,
+.shared-trip-decline-button-icon {
+    width: 30px;
+}
+
+.shared-trip-accept-button {
+    background-color: green;
+}
+
+.shared-trip-decline-button {
+    background-color: red;
+}
+
+.shared-trip-accept-button:hover,
+.shared-trip-decline-button:hover {
+    filter: var(--BUTTON-HOVER-FILTER);
 }
 </style>
 

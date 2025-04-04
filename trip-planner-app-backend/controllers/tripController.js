@@ -36,8 +36,11 @@ const getSharedTripsByUserId = async (req, res) => {
 
         const userObj = await User.findById(user.userId);
 
-        const sharedTrips = await Promise.all(userObj.sharedTrips.map(async (tripId) => {
-            return await Trip.findById(tripId);
+        const sharedTrips = await Promise.all(userObj.sharedTrips.map(async (sharedTrip) => {
+            return {
+                trip: await Trip.findById(sharedTrip.tripId),
+                isPending: sharedTrip.isPending
+            };
         }));
 
         return res.status(200).json({

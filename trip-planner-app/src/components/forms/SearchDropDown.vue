@@ -9,8 +9,7 @@
         >
         <div class="dropdown-item-name">{{ props.user.firstName + ' ' + props.user.lastName }}</div>
         <div class="dropdown-item-description">{{ props.user.username }}</div>
-</button>
-
+    </button>
 </template>
 
 <script setup>

@@ -8,14 +8,14 @@
             <FormInput
                 :type-of-input="'text'"
                 :input-label="'Username'"
-                :update-event="'username-updated'"
+                :update-event="'login-username-updated'"
             >
             </FormInput>
 
             <FormInput
                 :type-of-input="'password'"
                 :input-label="'Password'"
-                :update-event="'password-updated'"
+                :update-event="'login-password-updated'"
             >
             </FormInput>
 
@@ -69,9 +69,9 @@ export default {
     },
     inject: ['$bus'],
     created() {
-        this.$bus.$on('username-updated', this.updateUsername);
+        this.$bus.$on('login-username-updated', this.updateUsername);
 
-        this.$bus.$on('password-updated', this.updatePassword);
+        this.$bus.$on('login-password-updated', this.updatePassword);
     },
     methods: {
         updateUsername(username){

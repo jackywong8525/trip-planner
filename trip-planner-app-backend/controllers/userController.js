@@ -61,6 +61,8 @@ const register = async (req, res) => {
         // If no, save to the database
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+        console.log(phone);
+
         const user = new User({
             lastName: lastName,
             firstName: firstName,
