@@ -253,7 +253,7 @@ function addPeople(data) {
 
     people.value.push(filteredUsers.value[data.index]);
     updateUsername('');
-    $bus.$emit('reset-input-Username');
+    $bus.$emit('reset-input-username-updated');
 }
 
 function deletePeople(index) {
@@ -270,7 +270,7 @@ async function updateFilteredUsers() {
 
     const API_URL = "http://localhost:5000";
 
-    const response = await fetch(API_URL + '/main/trip/add-trip/add-people', {
+    const response = await fetch(API_URL + '/user/find-users-by-username-filter', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
@@ -374,6 +374,8 @@ async function submitForm() {
     }
 
     submitAttempted.value = true;
+
+    $bus.$emit('refresh-owned-trips');
      
     return;
 

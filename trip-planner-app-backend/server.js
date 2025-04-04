@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cors());
 
 // Authentication
-app.use('/auth', userRoute);
+app.use('/user', userRoute);
 
 // Routes
 app.use('/main', mainRoute);

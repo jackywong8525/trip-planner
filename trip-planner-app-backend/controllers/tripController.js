@@ -6,49 +6,6 @@ const { privateKey, auth } = require('../auth/auth.js');
 const User = require('../models/user.js');
 const Trip = require('../models/trip.js');
 
-const findUsers = async (req, res) => {
-
-    console.log('Request received Haha');
-
-    const { username, token } = req.body;
-
-    try {
-
-        const requestedUser = await jwt.verify(token, privateKey);
-
-        const userList = await User.find({$and:[
-            {"username" : new RegExp(username, 'i')},
-            {"_id" : { $ne: requestedUser.userId }}
-        ]});
-
-
-        const formattedUserList = userList
-        .map((user) => {
-            return {
-                userId: user._id,
-                lastName: user.lastName,
-                firstName: user.firstName,
-                username: user.username
-            }
-        });
-
-
-        return res.status(200).json({
-            success: true,
-            userList: formattedUserList
-        });
-
-    } catch(error) {
-        console.log('Request Failed');
-        console.log(error.message);
-        res.status(400).json({
-            success: false,
-            message: 'Can\'t find users due to some reasons. Please try again.',
-        });
-    }
-
-}
-
 const getOwnedTripsByUserId = async (req, res) => {
     const { token } = req.body;
 
@@ -60,6 +17,32 @@ const getOwnedTripsByUserId = async (req, res) => {
         return res.status(200).json({
             success: true,
             trips: trips,
+            message: "Trips retrieved successfully."
+        });
+
+    } catch(error) {
+        res.status(400).json({
+            success: false,
+            message: 'Can\'t get the trip due to some reasons. Please try again.',
+        });
+    }
+}
+
+const getSharedTripsByUserId = async (req, res) => {
+    const { token } = req.body;
+
+    try {
+        const user = await jwt.verify(token, privateKey);
+
+        const userObj = await User.findById(user.userId);
+
+        const sharedTrips = await Promise.all(userObj.sharedTrips.map(async (tripId) => {
+            return await Trip.findById(tripId);
+        }));
+
+        return res.status(200).json({
+            success: true,
+            trips: sharedTrips.filter((sharedTrip) => { return sharedTrip !== null }),
             message: "Trips retrieved successfully."
         });
 
@@ -94,7 +77,7 @@ const addTrip = async (req, res) => {
         await trip.save({ session });
 
         await User.findByIdAndUpdate(
-            owner._id,
+            owner.userId,
             { $push: {ownedTrips: trip._id} },
             { 
                 new: true,
@@ -106,7 +89,7 @@ const addTrip = async (req, res) => {
             people.map(async (personId) => {
                 await User.findByIdAndUpdate(
                     personId,
-                    { $push: { sharedTrips: trip._id } },
+                    { $push: { sharedTrips: {tripId: trip._id, isPending: true} } },
                     { session }
                 );
             })
@@ -170,7 +153,7 @@ const deleteTrip = async (req, res) => {
             people.map(async (personId) => {
                 await User.findByIdAndUpdate(
                     personId,
-                    { $pull: { sharedTrips: tripId } },
+                    { $pull: { sharedTrips: { $in: { tripId: tripId } } } },
                     { session }
                 );
             })
@@ -199,7 +182,8 @@ const deleteTrip = async (req, res) => {
 }
 
 module.exports = {
-    findUsers,
     addTrip,
-    deleteTrip
+    deleteTrip,
+    getOwnedTripsByUserId,
+    getSharedTripsByUserId
 }

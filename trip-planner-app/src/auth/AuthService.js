@@ -1,8 +1,8 @@
-const API_URL = "http://localhost:5000";
+import { API_URL } from "@/utils/backendConnection";
 
 class AuthService {
     async login(username, password){
-        const response = await fetch(API_URL + '/auth/login', {
+        const response = await fetch(API_URL + '/user/auth/login', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
@@ -30,7 +30,7 @@ class AuthService {
     }
 
     async register(user){
-        const response = await fetch(API_URL + '/auth/register', {
+        const response = await fetch(API_URL + '/user/auth/register', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
