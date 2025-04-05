@@ -52,11 +52,12 @@
     --SMALL-ITEM-SHADOW: 1px 1px 5px var(--SHADOW-COLOR);
 
     /* || BUTTON */
-    --BUTTON-BORDER: var(--GENERAL-BORDER);
+    --BUTTON-BORDER: 0px;
     --BUTTON-BORDER-RADIUS: 5px;
     --BUTTON-HEIGHT: 40px;
     --BUTTON-PADDING: 5px;
     --BUTTON-HOVER-FILTER: brightness(85%);
+    --BUTTON-DISABLED-FILTER: brightness(50%);
     --BUTTON-HOVER-CURSOR: pointer;
 
     /* || TRANSITION */

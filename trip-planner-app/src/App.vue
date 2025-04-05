@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header class="app-header">
     <NavBar v-if="!loginStatus" />
     <TripPlannerNavBar v-else></TripPlannerNavBar>
   </header>
@@ -37,4 +37,9 @@ export default {
 </script>
 
 <style scoped>
+.app-header{
+  position: sticky;
+  top: 0;
+  z-index: 98;
+}
 </style>

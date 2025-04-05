@@ -57,6 +57,105 @@ const getSharedTripsByUserId = async (req, res) => {
     }
 }
 
+const confirmTripInvitation = async (req, res) => {
+    const { userId, tripId, isAccepted } = req.body;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+
+        if(isAccepted){
+
+            console.log(userId, tripId, isAccepted)
+            
+            const result = await User.findOneAndUpdate(
+                // query based on userId and tripId in sharedTrips (mandatory)
+                { _id: userId, "sharedTrips.tripId": tripId },
+                {
+                    $set: { "sharedTrips.$.isPending": false }
+                },
+                { 
+                    new: true,
+                    session
+                }
+            );
+
+            await session.commitTransaction();
+            session.endSession();
+    
+            if(result) {
+                return res.status(200).json({
+                    success: true,
+                    message: "Trip invitation is accepted successfully."
+                });
+            }
+            
+            console.log(result);
+            return res.status(400).json({
+                success: false,
+                message: "Trip invitation cannot be accepted."
+            });
+        }
+    
+        else {
+
+            const resultFromUser = await User.findByIdAndUpdate(
+                userId,
+                {
+                    $pull: {
+                        sharedTrips: { tripId: tripId }
+                    }
+                },
+                { 
+                    new: true,
+                    session 
+                }
+            )
+
+            const resultFromTrip = await Trip.findByIdAndUpdate(
+                tripId,
+                {
+                    $pull: {
+                        people: userId
+                    }
+                },
+                { 
+                    new: true,
+                    session
+                }
+            )
+
+            await session.commitTransaction();
+            session.endSession();
+
+            if(resultFromUser && resultFromTrip) {
+                return res.status(200).json({
+                    success: true,
+                    message: "Trip invitation is declined successfully."
+                });
+            }
+
+            return res.status(200).json({
+                success: false,
+                message: "Trip invitation cannot be declined."
+            });
+        }
+
+    } catch(error) {
+        await session.abortTransaction();
+        session.endSession();
+
+        console.log('Request Failed');
+        console.log(error.message);
+        res.status(400).json({
+            success: false,
+            message: 'Can\'t accept/decline trip invitation due to some reasons. Please try again.',
+        });
+    }
+    
+}
+
 const addTrip = async (req, res) => {
     const { name, location, startDate, endDate, people, isChecklistShared, token } = req.body;
 
@@ -188,5 +287,6 @@ module.exports = {
     addTrip,
     deleteTrip,
     getOwnedTripsByUserId,
-    getSharedTripsByUserId
+    getSharedTripsByUserId,
+    confirmTripInvitation
 }

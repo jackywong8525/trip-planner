@@ -143,6 +143,7 @@ import AuthService from '@/auth/AuthService';
 import { InputValidation, alphabets, alphabetsAndDigits } from '@/utils/inputValidation';
 import { API_URL } from '@/utils/backendConnection';
 import { AlertType } from '@/utils/AlertType';
+import { Alert } from '@/utils/Alert';
 
 const $bus = inject('$bus');
 
@@ -367,10 +368,10 @@ async function submitForm() {
 
     if(submitStatus.value) {    
         closeAddTripForm();
-        $bus.$emit('emit-alert', {
-            alertType: AlertType.SUCCESS,
-            message: `${tripName.value} is successfully added.`
-        });
+        $bus.$emit('emit-alert', new Alert(
+            AlertType.SUCCESS,
+            `${tripName.value} is successfully added.`
+        ));
     }
 
     submitAttempted.value = true;

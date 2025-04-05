@@ -62,7 +62,7 @@ const props = defineProps({
 }
 
 .alert {
-    position: absolute;
+    position: sticky;
     left: 50vw;
     top: 80px;
     transform: translateX(-50%);
@@ -71,7 +71,7 @@ const props = defineProps({
     display: grid;
     grid-template-columns: 60px 1fr;
     width: 350px;
-    height: 60px;
+    min-height: 60px;
 
     border-radius: 10px;
 } 
@@ -89,6 +89,7 @@ const props = defineProps({
     justify-content: center;
     align-items: center;
 
+    font-size: clamp(0.8rem, 5vw, 0.9rem);
     color: var(--SUPP-FONT-COLOR-LIGHT);
 }
 

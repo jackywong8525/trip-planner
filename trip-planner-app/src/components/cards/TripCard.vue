@@ -1,65 +1,73 @@
 <template>
-    <div class="trip-card">
-        <div class="trip-card-header"></div>
-        <div class="trip-card-content">
-            <div class="trip-name">
-                {{ props.trip.name }}
-            </div>
-            <div class="trip-date">
-                created at {{ props.trip.createdAt.slice(0, 10) }}
-            </div>
-            <div 
-                class="trip-owner"
-                v-if="!props.isOwner">
-                by {{ tripOwner.username }}
-            </div>
-            <br>
-            <div class="trip-location">
-                <img 
-                    src="/icons/location-icon.png"
-                    class="trip-location-icon">
-                <div class="trip-location-text">{{ props.trip.location }}</div>
-            </div>
-            <div class="trip-date">
-                <img 
-                    src="/icons/calendar-icon.png"
-                    class="trip-date-icon">
-                <div class="trip-date-range">{{ props.trip.startDate }} - {{ props.trip.endDate }}</div>
-            </div>
-            <div class="trip-people">
-                <img 
-                    src="/icons/user-icon.png"
-                    class="trip-people-icon">
-                <div class="trip-people-list">
-                    {{ tripPeopleString }}
+    <div class="trip-card-container">
+        <div class="trip-card" :class="{'disabled-card': props.isPending}">
+            <div class="trip-card-header"></div>
+            <div class="trip-card-content">
+                <div class="trip-name">
+                    {{ props.trip.name }}
+                </div>
+                <div class="trip-date">
+                    created at {{ props.trip.createdAt.slice(0, 10) }}
+                </div>
+                <div 
+                    class="trip-owner"
+                    v-if="!props.isOwner">
+                    by {{ tripOwner.username }}
+                </div>
+                <br>
+                <div class="trip-location">
+                    <img 
+                        src="/icons/location-icon.png"
+                        class="trip-location-icon">
+                    <div class="trip-location-text">{{ props.trip.location }}</div>
+                </div>
+                <div class="trip-date">
+                    <img 
+                        src="/icons/calendar-icon.png"
+                        class="trip-date-icon">
+                    <div class="trip-date-range">{{ props.trip.startDate }} - {{ props.trip.endDate }}</div>
+                </div>
+                <div class="trip-people">
+                    <img 
+                        src="/icons/user-icon.png"
+                        class="trip-people-icon">
+                    <div class="trip-people-list">
+                        {{ tripPeopleString }}
+                    </div>
                 </div>
             </div>
-            <div 
-                class="shared-trip-permission"
-                v-if="!props.isOwner && props.isPending">
-                    <button 
-                        class="shared-trip-accept-button">
-                        <img 
-                            src="/icons/tick-icon.png"
-                            class="shared-trip-accept-button-icon">
-                        Accept
-                    </button>
-                    <button
-                        class="shared-trip-decline-button">
-                        <img 
-                            src="/icons/cross-icon.png"
-                            class="shared-trip-decline-button-icon">
-                        Decline
-                    </button>
-            </div>
+        </div>
+        <div 
+            class="shared-trip-permission"
+            v-if="!props.isOwner && props.isPending">
+                <button 
+                    class="shared-trip-accept-button"
+                    @click.prevent="confirmTripInvitation(true)">
+                    <img 
+                        src="/icons/tick-icon.png"
+                        class="shared-trip-accept-button-icon">
+                    Accept
+                </button>
+                <button
+                    class="shared-trip-decline-button"
+                    @click.prevent="confirmTripInvitation(false)">
+                    <img 
+                        src="/icons/cross-icon.png"
+                        class="shared-trip-decline-button-icon">
+                    Decline
+                </button>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, inject } from 'vue';
 import { API_URL } from '@/utils/backendConnection';
 import AuthService from '@/auth/AuthService';
+import { AlertType } from '@/utils/AlertType.js';
+import { Alert } from '@/utils/Alert';
+
+const $bus = inject('$bus');
 
 // Props
 const props = defineProps({
@@ -143,6 +151,40 @@ async function loadTripOwner() {
     tripOwner.value = responseObj.user;
 }
 
+async function confirmTripInvitation(isAccepted){
+
+    const response = await fetch(API_URL + '/main/trip/confirm-trip-invitation', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getCurrentUser()}`
+        },
+        body: JSON.stringify({
+            userId: props.activeUser.userId,
+            tripId: props.trip._id,
+            isAccepted: isAccepted
+        })
+    });
+
+    const responseObj = await response.json();
+
+    if(responseObj.success){
+        $bus.$emit('emit-alert', new Alert(
+            AlertType.SUCCESS,
+            `Invitation for ${props.trip.name} has been ${isAccepted ? 'accepted' : 'declined' }.`
+        ));
+        $bus.$emit('refresh-shared-trips');
+    }
+
+    else{
+        $bus.$emit('emit-alert', new Alert(
+            AlertType.CAUTION,
+            `Invitation for ${props.trip.name} cannot be ${isAccepted ? 'accepted' : 'declined' } due to some reasons. Please try again.`
+        ));
+    }
+
+}
+
 onMounted(async () => {
     await loadTripOwner();
     await loadTripPeople();
@@ -152,6 +194,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
+.trip-card-container {
+    position: relative
+}
+
 .trip-card {
     /* Box and Size Properties */
     min-width: 300px;
@@ -216,20 +263,32 @@ onMounted(async () => {
     justify-content: center;
     align-items: center;
     gap: 10px;
+
+    position: relative;
+    bottom: 50%;
 }
 
 .shared-trip-accept-button,
 .shared-trip-decline-button {
-    height: 40px;
+    /* Box and Size Properties */
+    height: var(--BUTTON-HEIGHT);
     width: 150px;
-    border-radius: 5px;
+    padding: var(--BUTTON-PADDING);
+
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
-    border: 0px;
+    
+    /* Border */
+    border: var(--BUTTON-BORDER);
+    border-radius: var(--BUTTON-BORDER-RADIUS);
 
+    /* Color */
     color: var(--SUPP-FONT-COLOR-LIGHT);
+
+    /* Other */
+    cursor: pointer;
 }
 
 .shared-trip-accept-button-icon,
@@ -249,5 +308,12 @@ onMounted(async () => {
 .shared-trip-decline-button:hover {
     filter: var(--BUTTON-HOVER-FILTER);
 }
+
+.disabled-card {
+    pointer-events: none;
+    filter: var(--BUTTON-DISABLED-FILTER);
+}
+
+
 </style>
 

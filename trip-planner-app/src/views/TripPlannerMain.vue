@@ -1,11 +1,11 @@
 <template>
 
-    <Alert
+    <AlertComponent
         v-if="alertEmitted"
         :alert-type="alert.alertType"
         :message="alert.message"
         :is-visible="alertEmitted"
-    ></Alert>
+    ></AlertComponent>
 
     <div 
         :class="`main-page-container ${showAddTripForm ? 'blur' : ''}`"
@@ -73,7 +73,7 @@ import CardButton from '@/components/cards/CardButton.vue';
 import Subheader from '@/components/subheader/Subheader.vue';
 import AddTripForm from '@/components/forms/AddTripForm.vue';
 import TripCard from '@/components/cards/TripCard.vue';
-import Alert from '@/components/alert/Alert.vue';
+import AlertComponent from '@/components/alert/AlertComponent.vue';
 import AuthService from '@/auth/AuthService';
 import { API_URL } from '@/utils/backendConnection';
 import { ref, inject, onMounted } from 'vue';
@@ -92,6 +92,7 @@ const activeUser = ref({});
 $bus.$on('close-add-trip-form', toggleAddTripForm);
 $bus.$on('emit-alert', showAlert);
 $bus.$on('refresh-owned-trips', getOwnedTrips);
+$bus.$on('refresh-shared-trips', getSharedTrips);
 
 onMounted(async () => {
     await getActiveUser();
@@ -146,8 +147,6 @@ async function getSharedTrips() {
 
     const responseObj = await response.json();
 
-    console.log(responseObj);
-
     sharedTrips.value = responseObj.trips;
 }
 
@@ -196,7 +195,7 @@ function showAlert(alertObject){
 .owned-trips-container, .shared-trips-container {
     min-height: 500px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1rem;
 
 }
