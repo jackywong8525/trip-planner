@@ -196,7 +196,9 @@ onMounted(async () => {
 <style scoped>
 
 .trip-card-container {
-    position: relative
+    position: relative;
+    min-width: 0px;
+    min-height: 0px;
 }
 
 .trip-card {
@@ -213,7 +215,7 @@ onMounted(async () => {
 
     /* Display */
     display: grid;
-    grid-template-rows: 2fr 1fr;
+    grid-template-rows: 5fr 6fr;
     flex: 1;
 
     /* Others */
@@ -236,6 +238,7 @@ onMounted(async () => {
 .trip-card-content {
     padding: 20px 15px;
     color: var(--SUPP-FONT-COLOR-DARK);
+    box-shadow: var(--GENERAL-SHADOW);
 }
 
 .trip-name {
@@ -263,9 +266,12 @@ onMounted(async () => {
     justify-content: center;
     align-items: center;
     gap: 10px;
+    margin: 10px 20px;
+    height: 410px;
 
     position: relative;
     bottom: 50%;
+
 }
 
 .shared-trip-accept-button,
@@ -310,8 +316,16 @@ onMounted(async () => {
 }
 
 .disabled-card {
-    pointer-events: none;
-    filter: var(--BUTTON-DISABLED-FILTER);
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.shared-trip-permission {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.shared-trip-permission:hover {
+    opacity: 1;
 }
 
 

@@ -44,6 +44,7 @@
                 :trip="trip"
                 :active-user="activeUser"
                 :is-owner="true"
+                @click.prevent="showEditTripPage(trip)"
             >
             </TripCard>
         </div>
@@ -59,6 +60,7 @@
                 :isPending="tripObj.isPending"
                 :active-user="activeUser"
                 :is-owner="false"
+                @click.prevent="showEditTripPage(tripObj.trip)"
             >
             </TripCard>
         </div>
@@ -148,6 +150,13 @@ async function getSharedTrips() {
     const responseObj = await response.json();
 
     sharedTrips.value = responseObj.trips;
+}
+
+function showEditTripPage(trip) {
+    $bus.$emit('switch-page', {
+        name: 'main-edit-trip',
+        trip
+    });
 }
 
 function toggleAddTripForm(){

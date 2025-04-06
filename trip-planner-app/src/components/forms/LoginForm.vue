@@ -104,7 +104,7 @@ export default {
             if(this.loginStatus){
                 this.$bus.$emit('login-successful', true);
 
-                this.$router.push({ path: 'main' });
+                this.$router.push({ path: 'main/home' });
             }
 
             this.loginAttempted = true;

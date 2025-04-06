@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AuthService from '@/auth/AuthService';
 import HomeView from '@/views/HomeView.vue';
-import TripPlannerMain from '@/views/TripPlannerMain.vue';
 import RegisterView from '@/views/RegisterView.vue';
+
+import TripPlannerAppContainer from '@/views/TripPlannerAppContainer.vue';
+import TripPlannerMainView from '@/views/TripPlannerMainView.vue';
+import TripPlannerEditView from '@/views/TripPlannerEditView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,15 +34,39 @@ const router = createRouter({
     {
       path: '/main',
       name: 'main',
-      component: TripPlannerMain,
+      component: TripPlannerAppContainer,
       children: [
+        {
+          path: 'home',
+          name: 'main-home',
+          component: TripPlannerMainView
+        },
         { 
-          path: 'trips',
-          name: 'trips'
+          path: 'owned-trips',
+          name: 'main-ownedTrips'
         },
         { 
           path: 'settings',
-          name: 'settings'
+          name: 'main-settings'
+        },
+        {
+          path: ':tripId',
+          name: 'main-edit-trip',
+          component: TripPlannerEditView,
+          children: [
+            {
+              path: 'trip-info',
+              name: 'tripInfo'
+            },
+            {
+              path: 'trip-checklist',
+              name: 'tripChecklist'
+            },
+            {
+              path: 'trip-schedule',
+              name: 'tripSchedule'
+            }
+          ]
         }
       ],
       meta: {
