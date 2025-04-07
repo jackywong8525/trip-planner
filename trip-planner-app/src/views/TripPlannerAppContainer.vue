@@ -1,5 +1,12 @@
 <template>
 
+<AlertComponent
+    v-if="alertEmitted"
+    :alert-type="alert.alertType"
+    :message="alert.message"
+    :is-visible="alertEmitted"
+></AlertComponent>
+
 <RouterView
     :trip="activeTrip"    
 />
@@ -9,12 +16,18 @@
 <script setup>
 import { ref, inject } from 'vue'; 
 import { useRouter } from 'vue-router';
+import AlertComponent from '@/components/alert/AlertComponent.vue';
+import { AlertType } from '@/utils/AlertType';
+
 const router = useRouter();
 const $bus = inject('$bus');
 
 const activeTrip = ref({});
+const alertEmitted = ref(false);
+const alert = ref();
 
 $bus.$on('switch-page', switchPage);
+$bus.$on('emit-alert', showAlert);
 
 
 function switchPage(pageObject) {
@@ -33,6 +46,30 @@ function switchPage(pageObject) {
         }
     });
 }
+
+function showAlert(alertObject){
+    alert.value = alertObject;
+    alertEmitted.value = true;
+
+    let alertTime;
+
+    if(alertTime){
+        clearTimeout(alertTime);
+    }
+    
+    alertTime = setTimeout(() => {
+        $bus.$emit('hide-alert');
+
+        setTimeout(() => {
+            alertEmitted.value = false;
+        }, 1000)
+    }, 10000);
+}
+
+showAlert({
+    alertType: AlertType.SUCCESS,
+    message: "Login successful"
+});
 </script>
 
 <style scoped>

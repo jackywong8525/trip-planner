@@ -40,6 +40,6 @@ export default {
 .app-header{
   position: sticky;
   top: 0;
-  z-index: 98;
+  z-index: 99;
 }
 </style>

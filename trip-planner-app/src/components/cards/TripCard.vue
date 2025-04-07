@@ -317,6 +317,7 @@ onMounted(async () => {
 
 .disabled-card {
     background-color: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
 }
 
 .shared-trip-permission {

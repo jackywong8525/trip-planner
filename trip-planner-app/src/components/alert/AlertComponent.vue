@@ -62,11 +62,11 @@ const props = defineProps({
 }
 
 .alert {
-    position: sticky;
+    position: fixed;
     left: 50vw;
     top: 80px;
     transform: translateX(-50%);
-    z-index: 99;
+    z-index: 98;
 
     display: grid;
     grid-template-columns: 60px 1fr;

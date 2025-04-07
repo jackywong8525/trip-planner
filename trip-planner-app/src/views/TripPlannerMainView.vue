@@ -1,12 +1,5 @@
 <template>
 
-    <AlertComponent
-        v-if="alertEmitted"
-        :alert-type="alert.alertType"
-        :message="alert.message"
-        :is-visible="alertEmitted"
-    ></AlertComponent>
-
     <div 
         :class="`main-page-container ${showAddTripForm ? 'blur' : ''}`"
         :inert="showAddTripForm"
@@ -44,7 +37,10 @@
                 :trip="trip"
                 :active-user="activeUser"
                 :is-owner="true"
-                @click.prevent="showEditTripPage(trip)"
+                @click.prevent="showEditTripPage({
+                    trip: trip,
+                    isOwner: true
+                })"
             >
             </TripCard>
         </div>
@@ -60,7 +56,11 @@
                 :isPending="tripObj.isPending"
                 :active-user="activeUser"
                 :is-owner="false"
-                @click.prevent="showEditTripPage(tripObj.trip)"
+                @click.prevent="showEditTripPage({
+                    trip: tripObj.trip,
+                    isPending: tripObj.isPending,
+                    isOwner: false
+                })"
             >
             </TripCard>
         </div>
@@ -75,7 +75,6 @@ import CardButton from '@/components/cards/CardButton.vue';
 import Subheader from '@/components/subheader/Subheader.vue';
 import AddTripForm from '@/components/forms/AddTripForm.vue';
 import TripCard from '@/components/cards/TripCard.vue';
-import AlertComponent from '@/components/alert/AlertComponent.vue';
 import AuthService from '@/auth/AuthService';
 import { API_URL } from '@/utils/backendConnection';
 import { ref, inject, onMounted } from 'vue';
@@ -87,12 +86,9 @@ const $bus = inject('$bus');
 const showAddTripForm = ref(false);
 const ownedTrips = ref([]);
 const sharedTrips = ref([]);
-const alertEmitted = ref(false);
-const alert = ref();
 const activeUser = ref({});
 
 $bus.$on('close-add-trip-form', toggleAddTripForm);
-$bus.$on('emit-alert', showAlert);
 $bus.$on('refresh-owned-trips', getOwnedTrips);
 $bus.$on('refresh-shared-trips', getSharedTrips);
 
@@ -152,34 +148,18 @@ async function getSharedTrips() {
     sharedTrips.value = responseObj.trips;
 }
 
-function showEditTripPage(trip) {
-    $bus.$emit('switch-page', {
-        name: 'main-edit-trip',
-        trip
-    });
+function showEditTripPage(tripValidation) {
+
+    if((!tripValidation.isOwner && !tripValidation.isPending) || tripValidation.isOwner){
+        $bus.$emit('switch-page', {
+            name: 'main-edit-trip',
+            trip: tripValidation.trip
+        });
+    }
 }
 
 function toggleAddTripForm(){
     showAddTripForm.value = !showAddTripForm.value;
-}
-
-function showAlert(alertObject){
-    alert.value = alertObject;
-    alertEmitted.value = true;
-
-    let alertTime;
-
-    if(alertTime){
-        clearTimeout(alertTime);
-    }
-    
-    alertTime = setTimeout(() => {
-        $bus.$emit('hide-alert');
-
-        setTimeout(() => {
-            alertEmitted.value = false;
-        }, 1000)
-    }, 10000);
 }
 
 </script>
