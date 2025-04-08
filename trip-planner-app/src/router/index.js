@@ -6,6 +6,7 @@ import RegisterView from '@/views/RegisterView.vue';
 import TripPlannerAppContainer from '@/views/TripPlannerAppContainer.vue';
 import TripPlannerMainView from '@/views/TripPlannerMainView.vue';
 import TripPlannerEditView from '@/views/TripPlannerEditView.vue';
+import TripPlannerEditTripInfoView from '@/views/TripPlannerEditTripInfoView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,15 +57,16 @@ const router = createRouter({
           children: [
             {
               path: 'trip-info',
-              name: 'tripInfo'
+              name: 'main-edit-trip-info',
+              component: TripPlannerEditTripInfoView
             },
             {
               path: 'trip-checklist',
-              name: 'tripChecklist'
+              name: 'main-edit-trip-checklist'
             },
             {
               path: 'trip-schedule',
-              name: 'tripSchedule'
+              name: 'main-edit-trip-schedule'
             }
           ]
         }

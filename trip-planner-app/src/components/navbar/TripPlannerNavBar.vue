@@ -4,6 +4,14 @@
     <li class="navbar-list-item">
       <RouterLink 
         class="navbar-router-link" 
+        :to="'/main/home'"
+        active-class="active-link"
+        >Home
+      </RouterLink>
+    </li>
+    <li class="navbar-list-item">
+      <RouterLink 
+        class="navbar-router-link" 
         :to="'/main/trips'"
         active-class="active-link"
         >My Trips

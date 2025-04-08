@@ -17,7 +17,6 @@
 import { ref, inject } from 'vue'; 
 import { useRouter } from 'vue-router';
 import AlertComponent from '@/components/alert/AlertComponent.vue';
-import { AlertType } from '@/utils/AlertType';
 
 const router = useRouter();
 const $bus = inject('$bus');
@@ -65,11 +64,6 @@ function showAlert(alertObject){
         }, 1000)
     }, 10000);
 }
-
-showAlert({
-    alertType: AlertType.SUCCESS,
-    message: "Login successful"
-});
 </script>
 
 <style scoped>

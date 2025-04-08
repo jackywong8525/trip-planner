@@ -152,7 +152,7 @@ function showEditTripPage(tripValidation) {
 
     if((!tripValidation.isOwner && !tripValidation.isPending) || tripValidation.isOwner){
         $bus.$emit('switch-page', {
-            name: 'main-edit-trip',
+            name: 'main-edit-trip-info',
             trip: tripValidation.trip
         });
     }

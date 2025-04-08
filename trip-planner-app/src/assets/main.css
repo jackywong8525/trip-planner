@@ -50,6 +50,7 @@
     /* || SHADOW */
     --GENERAL-SHADOW: 1px 1px 10px var(--SHADOW-COLOR);
     --SMALL-ITEM-SHADOW: 1px 1px 5px var(--SHADOW-COLOR);
+    --CONTAINER-SHADOW: 1px 6px 6px var(--SHADOW-COLOR);
 
     /* || BUTTON */
     --BUTTON-BORDER: 0px;
