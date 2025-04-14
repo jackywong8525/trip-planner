@@ -1,6 +1,7 @@
 import AuthService from "@/auth/AuthService";
+import { API_URL } from "./backendConnection";
 
-const loadTripPeople = async (trip) => {
+const loadTripPeople = async (trip, except) => {
 
     const responses = await Promise.all(trip.people.map(
         (personId) => {
@@ -18,11 +19,18 @@ const loadTripPeople = async (trip) => {
     ));
 
     const usernames = await Promise.all(
-        responses.map(async (response) => {
-            const responseObj = await response.json();
-            return responseObj.user.username;
-        })
+        responses
+            .map(async (response) => {
+                const responseObj = await response.json();
+                return responseObj.user.username;
+            })
     );
 
-    return usernames;
+    return usernames.filter((username) => {
+        return except.username !== username;
+    });
+}
+
+export {
+    loadTripPeople
 }

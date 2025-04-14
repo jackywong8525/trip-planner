@@ -66,6 +66,7 @@ import { API_URL } from '@/utils/backendConnection';
 import AuthService from '@/auth/AuthService';
 import { AlertType } from '@/utils/AlertType.js';
 import { Alert } from '@/utils/Alert';
+import { loadTripPeople } from '@/utils/Trip';
 
 const $bus = inject('$bus');
 
@@ -100,28 +101,9 @@ const tripPeopleString = computed(() => {
 });
 
 // For owned trips
-async function loadTripPeople() {
+async function loadTripPeopleList() {
 
-    const responses 
-        = await Promise.all(props.trip.people.map((personId) => {
-                return fetch(API_URL + '/user/find-user-by-userId', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${AuthService.getCurrentUser()}`
-                },
-                body: JSON.stringify({
-                    userId: personId
-                })
-            });
-        }))
-
-    const usernames = await Promise.all(
-        responses.map(async (response) => {
-            const responseObj = await response.json();
-            return responseObj.user.username;
-        })
-    )
+    const usernames = await loadTripPeople(props.trip, props.activeUser);
 
     tripPeople.value.push(...usernames);
     
@@ -187,7 +169,7 @@ async function confirmTripInvitation(isAccepted){
 
 onMounted(async () => {
     await loadTripOwner();
-    await loadTripPeople();
+    await loadTripPeopleList();
 });
 
 

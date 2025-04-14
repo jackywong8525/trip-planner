@@ -245,7 +245,7 @@ const deleteTrip = async (req, res) => {
             ownerId,
             {
                 $pull: {
-                    ownedTrips: { $in: tripId }
+                    ownedTrips: tripId
                 }
             },
             { session }

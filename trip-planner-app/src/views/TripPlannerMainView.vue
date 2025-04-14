@@ -59,7 +59,8 @@
                 @click.prevent="showEditTripPage({
                     trip: tripObj.trip,
                     isPending: tripObj.isPending,
-                    isOwner: false
+                    isOwner: false,
+                    activeUser: props.activeUser
                 })"
             >
             </TripCard>
@@ -86,33 +87,22 @@ const $bus = inject('$bus');
 const showAddTripForm = ref(false);
 const ownedTrips = ref([]);
 const sharedTrips = ref([]);
-const activeUser = ref({});
+
+const props = defineProps({
+    activeUser: {
+        type: Object,
+        required: true
+    }
+})
 
 $bus.$on('close-add-trip-form', toggleAddTripForm);
 $bus.$on('refresh-owned-trips', getOwnedTrips);
 $bus.$on('refresh-shared-trips', getSharedTrips);
 
 onMounted(async () => {
-    await getActiveUser();
     await getOwnedTrips();
     await getSharedTrips();
 });
-
-async function getActiveUser() {
-    const response = await fetch(API_URL + '/user/get-active-user', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AuthService.getCurrentUser()}`
-        },
-        body: JSON.stringify({
-            token: AuthService.getCurrentUser()
-        })
-    });
-
-    const responseObj = await response.json();
-    activeUser.value = responseObj.user;
-}
 
 async function getOwnedTrips() {
     const response = await fetch(API_URL + '/main/trip/get-owned-trips', {

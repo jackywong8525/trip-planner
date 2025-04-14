@@ -56,6 +56,7 @@
     <div class="trip-planner-edit-view-container">
         <RouterView 
             :trip="props.trip"
+            :active-user="props.activeUser"
         />
     </div>
 </template>
@@ -67,6 +68,10 @@ const $bus = inject('$bus');
 
 const props = defineProps({
     trip: {
+        type: Object,
+        required: true
+    },
+    activeUser: {
         type: Object,
         required: true
     }

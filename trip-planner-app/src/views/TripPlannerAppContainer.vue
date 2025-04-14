@@ -8,15 +8,18 @@
 ></AlertComponent>
 
 <RouterView
-    :trip="activeTrip"    
+    :trip="activeTrip" 
+    :active-user="activeUser"   
 />
 
 </template>
 
 <script setup>
-import { ref, inject } from 'vue'; 
+import { ref, inject, onMounted } from 'vue'; 
 import { useRouter } from 'vue-router';
 import AlertComponent from '@/components/alert/AlertComponent.vue';
+import { API_URL } from '@/utils/backendConnection';
+import AuthService from '@/auth/AuthService';
 
 const router = useRouter();
 const $bus = inject('$bus');
@@ -24,9 +27,30 @@ const $bus = inject('$bus');
 const activeTrip = ref({});
 const alertEmitted = ref(false);
 const alert = ref();
+const activeUser = ref({});
 
 $bus.$on('switch-page', switchPage);
 $bus.$on('emit-alert', showAlert);
+
+onMounted(async () => {
+    await getActiveUser();
+})
+
+async function getActiveUser() {
+    const response = await fetch(API_URL + '/user/get-active-user', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getCurrentUser()}`
+        },
+        body: JSON.stringify({
+            token: AuthService.getCurrentUser()
+        })
+    });
+
+    const responseObj = await response.json();
+    activeUser.value = responseObj.user;
+}
 
 
 function switchPage(pageObject) {

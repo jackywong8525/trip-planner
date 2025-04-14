@@ -35,6 +35,9 @@
                 src="/icons/user-icon.png">
             User: 
         </div>
+        <div class="edit-trip-info-trip-people-value">
+            {{ tripPeopleString }}
+        </div>
     </div>
 </div>
 
@@ -42,12 +45,31 @@
 
 <script setup>
 
+import { ref, onMounted, computed } from 'vue';
+import { loadTripPeople } from '@/utils/Trip';
+
+const tripPeople = ref(['you']);
+const tripPeopleString = computed(() => {
+    return tripPeople.value.join(', ');
+})
+
 const props = defineProps({
     trip: {
         type: Object,
         required: true
+    },
+    activeUser: {
+        type: Object,
+        required: true
     }
 })
+
+onMounted(async () => {
+    const usernames = await loadTripPeople(props.trip, props.activeUser);
+    if(usernames.length > 0){
+        tripPeople.value.push(...usernames);
+    }
+});
 
 </script>
 
