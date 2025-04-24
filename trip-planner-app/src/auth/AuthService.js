@@ -23,8 +23,10 @@ class AuthService {
         } 
 
         if(responseObj.success && responseObj.token){
-            localStorage.setItem('user', JSON.stringify(responseObj.token));
+            localStorage.setItem('userToken', JSON.stringify(responseObj.token));
         }
+
+        await this.getCurrentUserInfo();
 
         return responseObj;
     }
@@ -51,11 +53,38 @@ class AuthService {
     }
 
     logout(){
-        localStorage.removeItem('user');
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userInfo');
     }
 
     getCurrentUser() {
-        return JSON.parse(localStorage.getItem('user'));
+        return JSON.parse(localStorage.getItem('userToken'));
+    }
+
+    async getCurrentUserInfo() {
+
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+        if(userInfo){
+            return userInfo;
+        }
+
+        const response = await fetch(API_URL + '/user/get-active-user', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.getCurrentUser()}`
+            },
+            body: JSON.stringify({
+                token: this.getCurrentUser()
+            })
+        });
+    
+        const responseObj = await response.json();
+
+        localStorage.setItem('userInfo', JSON.stringify(responseObj.user));
+
+        return responseObj.user;
     }
 }
 

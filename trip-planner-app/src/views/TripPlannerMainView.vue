@@ -35,7 +35,7 @@
             <TripCard
                 v-for="(trip, index) in ownedTrips"
                 :trip="trip"
-                :active-user="activeUser"
+                :active-user="AuthService.getCurrentUserInfo()"
                 :is-owner="true"
                 @click.prevent="showEditTripPage({
                     trip: trip,
@@ -54,13 +54,13 @@
                 v-for="(tripObj, index) in sharedTrips"
                 :trip="tripObj.trip"
                 :isPending="tripObj.isPending"
-                :active-user="activeUser"
+                :active-user="AuthService.getCurrentUserInfo()"
                 :is-owner="false"
                 @click.prevent="showEditTripPage({
                     trip: tripObj.trip,
                     isPending: tripObj.isPending,
                     isOwner: false,
-                    activeUser: props.activeUser
+                    activeUser: AuthService.getCurrentUserInfo()
                 })"
             >
             </TripCard>
@@ -87,13 +87,6 @@ const $bus = inject('$bus');
 const showAddTripForm = ref(false);
 const ownedTrips = ref([]);
 const sharedTrips = ref([]);
-
-const props = defineProps({
-    activeUser: {
-        type: Object,
-        required: true
-    }
-})
 
 $bus.$on('close-add-trip-form', toggleAddTripForm);
 $bus.$on('refresh-owned-trips', getOwnedTrips);

@@ -2,25 +2,35 @@
     
     <div class="trip-planner-edit-view-header">
         <div class="trip-planner-edit-view-header-placeholder"></div>
-        <div class="trip-planner-edit-view-header-trip-name">{{props.trip.name}}</div>
+        <div class="trip-planner-edit-view-header-trip-name">{{activeTrip.name}}</div>
         <div class="trip-planner-edit-view-header-trip-location">
             <img 
                 src="/icons/location-icon.png"
                 class="trip-location-icon">
-            <div class="trip-location-text">{{ props.trip.location }}</div>
+            <div class="trip-location-text">{{ activeTrip.location }}</div>
         </div>
         <div class="trip-planner-edit-view-header-trip-date">
             <img 
                 src="/icons/calendar-icon.png"
                 class="trip-date-icon">
-            <div class="trip-date-range">{{ props.trip.startDate }} <span class="nowrap">- {{ props.trip.endDate }}</span></div>
+            <div class="trip-date-range">{{ activeTrip.startDate }} <span class="nowrap">- {{ activeTrip.endDate }}</span></div>
         </div>
     </div>
     
     <ul class="trip-planner-navbar">
         <li class="trip-planner-navbar-item">
             <router-link
-                :to="`/main/${props.trip._id}/trip-info`"
+                :to="`/main/home`"
+                class="trip-planner-navbar-item-router-link home-router-link"
+                :active-class="'trip-planner-active-link'">
+                <img 
+                    class="trip-planner-navbar-item-image"
+                    src="/icons/home-icon.png">
+            </router-link>
+        </li>
+        <li class="trip-planner-navbar-item">
+            <router-link
+                :to="`/main/${$route.params.tripId}/trip-info`"
                 class="trip-planner-navbar-item-router-link"
                 :active-class="'trip-planner-active-link'">
                 <img 
@@ -31,7 +41,7 @@
         </li>
         <li class="trip-planner-navbar-item">
             <router-link
-                :to="`/main/${props.trip._id}/trip-checklist`"
+                :to="`/main/${$route.params.tripId}/trip-checklist`"
                 class="trip-planner-navbar-item-router-link"
                 :active-class="'trip-planner-active-link'">
                 <img 
@@ -42,7 +52,7 @@
         </li>
         <li class="trip-planner-navbar-item">
             <router-link
-                :to="`/main/${props.trip._id}/trip-schedule`"
+                :to="`/main/${$route.params.tripId}/trip-schedule`"
                 class="trip-planner-navbar-item-router-link"
                 :active-class="'trip-planner-active-link'">
                 <img 
@@ -55,27 +65,38 @@
 
     <div class="trip-planner-edit-view-container">
         <RouterView 
-            :trip="props.trip"
-            :active-user="props.activeUser"
-        />
+            v-if="isMounted"
+            :active-trip="activeTrip" />
     </div>
 </template>
 
 <script setup>
-import { ref, inject } from 'vue';
+import AuthService from '@/auth/AuthService';
+import { getTripByTripId } from '@/utils/Trip';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 
-const $bus = inject('$bus');
+const activeTrip = ref({});
+const activeUser = ref({});
+const isMounted = ref(false);
+const route = useRoute();
 
-const props = defineProps({
-    trip: {
-        type: Object,
-        required: true
-    },
-    activeUser: {
-        type: Object,
-        required: true
-    }
-});
+
+onMounted(async () => {
+    await getActiveTrip();
+    await getActiveUser();
+    isMounted.value = true;
+})
+
+async function getActiveTrip(){
+
+    activeTrip.value = await getTripByTripId(route.params.tripId);
+}
+
+async function getActiveUser(){
+    activeUser.value = await AuthService.getCurrentUserInfo();
+}
+
 
 </script>
 
@@ -113,8 +134,13 @@ const props = defineProps({
     background-color: var(--SUPP-THEME-COLOR-LIGHT);
 
     height: 50px;
-    width: clamp(100px, 30vw, 600px);
+    width: clamp(100px, 25vw, 600px);
 
+}
+
+.home-router-link {
+    border-radius: 25px;
+    width: 50px;
 }
 
 
@@ -232,7 +258,8 @@ const props = defineProps({
     }
 
     .trip-planner-edit-view-header-trip-location,
-    .trip-planner-edit-view-header-trip-date {
+    .trip-planner-edit-view-header-trip-date,
+    .home-router-link {
         display: none
     }
 

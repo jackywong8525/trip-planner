@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { privateKey, auth } = require('../auth/auth.js');
+const { ObjectId } = require('mongodb');
 
 // Importing User model
 const User = require('../models/user.js');
@@ -229,10 +230,19 @@ const deleteTrip = async (req, res) => {
     try{
         const user = await jwt.verify(token, privateKey);
 
-        const trip = Trip.findById(tripId);
+        const trip = await Trip.findById(tripId);
+
+        if(!trip){
+            return res.status(400).json({
+                success: false,
+                message: 'Can\'t delete the trip as it does not exist.',
+            });
+        }
+
         const { ownerId, people } = trip;
 
-        if(ownerId !== user.userId){
+        if(ownerId.toString() !== user.userId){
+            console.log(ownerId, user.userId);
             return res.status(400).json({
                 success: false,
                 message: 'Can\'t delete the trip that is not owned by the user.',
@@ -255,7 +265,7 @@ const deleteTrip = async (req, res) => {
             people.map(async (personId) => {
                 await User.findByIdAndUpdate(
                     personId,
-                    { $pull: { sharedTrips: { $in: { tripId: tripId } } } },
+                    { $pull: { sharedTrips: { tripId: tripId } } },
                     { session }
                 );
             })
@@ -269,7 +279,7 @@ const deleteTrip = async (req, res) => {
             message: "Trip successfully deleted."
         });
 
-    } catch {
+    } catch(error) {
         await session.abortTransaction();
         session.endSession();
 
@@ -283,10 +293,32 @@ const deleteTrip = async (req, res) => {
     
 }
 
+const getTripByTripId = async(req, res) => {
+    const {tripId} = req.body;
+
+    try {
+
+        const trip = await Trip.findById(tripId);
+
+        return res.status(200).json({
+            success: true,
+            trip: trip,
+            message: "Trip retrieved successfully."
+        });
+
+    } catch(error) {
+        res.status(400).json({
+            success: false,
+            message: 'Can\'t get the trip due to some reasons. Please try again.',
+        });
+    }
+}
+
 module.exports = {
     addTrip,
     deleteTrip,
     getOwnedTripsByUserId,
     getSharedTripsByUserId,
-    confirmTripInvitation
+    confirmTripInvitation,
+    getTripByTripId
 }

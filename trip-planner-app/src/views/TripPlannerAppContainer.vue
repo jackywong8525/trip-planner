@@ -7,10 +7,7 @@
     :is-visible="alertEmitted"
 ></AlertComponent>
 
-<RouterView
-    :trip="activeTrip" 
-    :active-user="activeUser"   
-/>
+<RouterView />
 
 </template>
 
@@ -24,7 +21,6 @@ import AuthService from '@/auth/AuthService';
 const router = useRouter();
 const $bus = inject('$bus');
 
-const activeTrip = ref({});
 const alertEmitted = ref(false);
 const alert = ref();
 const activeUser = ref({});
@@ -37,30 +33,15 @@ onMounted(async () => {
 })
 
 async function getActiveUser() {
-    const response = await fetch(API_URL + '/user/get-active-user', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${AuthService.getCurrentUser()}`
-        },
-        body: JSON.stringify({
-            token: AuthService.getCurrentUser()
-        })
-    });
-
-    const responseObj = await response.json();
-    activeUser.value = responseObj.user;
+    activeUser.value = await AuthService.getCurrentUserInfo();
 }
 
 
 function switchPage(pageObject) {
 
     if(pageObject.name === 'main-home'){
-        activeTrip.value = {};
         return router.push({ name: pageObject.name });
     }
-
-    activeTrip.value = pageObject.trip;
 
     return router.push({
         name: pageObject.name,

@@ -31,6 +31,47 @@ const loadTripPeople = async (trip, except) => {
     });
 }
 
+const deleteTrip = async (trip) => {
+
+    console.log(trip);
+
+    const response = await fetch(API_URL + '/main/trip/delete-trip', {
+        method: 'DELETE',
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getCurrentUser()}`
+        },
+        body: JSON.stringify({
+            token: AuthService.getCurrentUser(),
+            tripId: trip._id
+        })
+    });
+
+
+    const responseObj = await response.json();
+
+    return responseObj;
+}
+
+const getTripByTripId = async(tripId) => {
+    const response = await fetch(API_URL + '/main/trip/get-trip-by-tripId', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getCurrentUser()}`
+        },
+        body: JSON.stringify({
+            tripId: tripId
+        })
+    });
+
+    const responseObj = await response.json();
+
+    return responseObj.trip;
+}
+
 export {
-    loadTripPeople
+    loadTripPeople,
+    getTripByTripId,
+    deleteTrip
 }

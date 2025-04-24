@@ -7,6 +7,7 @@ import TripPlannerAppContainer from '@/views/TripPlannerAppContainer.vue';
 import TripPlannerMainView from '@/views/TripPlannerMainView.vue';
 import TripPlannerEditView from '@/views/TripPlannerEditView.vue';
 import TripPlannerEditTripInfoView from '@/views/TripPlannerEditTripInfoView.vue';
+import TripPlannerEditTripChecklistView from '@/views/TripPlannerEditTripChecklistView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,7 +63,8 @@ const router = createRouter({
             },
             {
               path: 'trip-checklist',
-              name: 'main-edit-trip-checklist'
+              name: 'main-edit-trip-checklist',
+              component: TripPlannerEditTripChecklistView
             },
             {
               path: 'trip-schedule',
@@ -73,7 +75,7 @@ const router = createRouter({
       ],
       meta: {
         requiresAuth: true
-      }
+      },
     }
   ],
 });

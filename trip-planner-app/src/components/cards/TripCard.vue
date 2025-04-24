@@ -1,7 +1,22 @@
 <template>
     <div class="trip-card-container">
         <div class="trip-card" :class="{'disabled-card': props.isPending}">
-            <div class="trip-card-header"></div>
+            <div 
+                class="trip-card-header"
+                @click.stop="toggleHeaderMenu">
+                <!-- click.stop: Prevent parent event being triggered -->
+                <img 
+                    src="/icons/dot-menu-icon.png"
+                    class="trip-card-header-menu-button">
+                <div
+                    class="trip-card-header-menu"
+                    v-if="isHeaderMenuOpen">
+                        <div class="trip-card-header-menu-option"
+                        @click.stop="deleteOwnedTrip">
+                            Delete Trip
+                        </div>
+                </div>
+            </div>
             <div class="trip-card-content">
                 <div class="trip-name">
                     {{ props.trip.name }}
@@ -66,7 +81,7 @@ import { API_URL } from '@/utils/backendConnection';
 import AuthService from '@/auth/AuthService';
 import { AlertType } from '@/utils/AlertType.js';
 import { Alert } from '@/utils/Alert';
-import { loadTripPeople } from '@/utils/Trip';
+import { loadTripPeople, deleteTrip } from '@/utils/Trip';
 
 const $bus = inject('$bus');
 
@@ -92,6 +107,7 @@ const props = defineProps({
 // Data Variables
 const tripOwner = ref({});
 const tripPeople = ref(['you']);
+const isHeaderMenuOpen = ref(false);
 
 // Computed Properties
 const tripPeopleString = computed(() => {
@@ -135,6 +151,9 @@ async function loadTripOwner() {
 
 async function confirmTripInvitation(isAccepted){
 
+    const user = await AuthService.getCurrentUserInfo();
+    
+
     const response = await fetch(API_URL + '/main/trip/confirm-trip-invitation', {
         method: 'POST',
         headers: {
@@ -142,7 +161,7 @@ async function confirmTripInvitation(isAccepted){
             Authorization: `Bearer ${AuthService.getCurrentUser()}`
         },
         body: JSON.stringify({
-            userId: props.activeUser.userId,
+            userId: user.userId,
             tripId: props.trip._id,
             isAccepted: isAccepted
         })
@@ -165,6 +184,35 @@ async function confirmTripInvitation(isAccepted){
         ));
     }
 
+}
+
+function toggleHeaderMenu() {
+    isHeaderMenuOpen.value = !isHeaderMenuOpen.value;
+}
+
+async function deleteOwnedTrip() {
+    const trip = props.trip;
+    const responseObj = await deleteTrip(trip);
+
+    if(responseObj.success) {      
+        $bus.$emit('emit-alert', new Alert(
+            AlertType.SUCCESS,
+            `${trip.name} is successfully deleted.`
+        ));
+
+        $bus.$emit('refresh-owned-trips');
+        toggleHeaderMenu();
+        return;
+    }
+
+
+    $bus.$emit('emit-alert', new Alert(
+        AlertType.CAUTION,
+        responseObj.message ?
+            responseObj.message
+            : `${trip.name} cannot be deleted. Please try again.`
+    ));
+    
 }
 
 onMounted(async () => {
@@ -215,6 +263,36 @@ onMounted(async () => {
 
     /* Border */
     border-radius: 5px 5px 0px 0px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.trip-card-header-menu-button {
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    margin: 10px;
+    padding: 5px;
+    width: 30px;
+
+    /* Border */
+    border-radius: 5px;
+
+    position: relative;
+
+    transform: rotateZ(90deg);
+}
+
+.trip-card-header-menu-button:hover {
+    filter: var(--BUTTON-HOVER-FILTER);
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .trip-card-content {
@@ -311,6 +389,34 @@ onMounted(async () => {
     opacity: 1;
 }
 
+.trip-card-header-menu {
+
+    margin: 0px 10px;
+
+    height: 70px;
+    width: 150px;
+
+    padding: 10px 0px;
+
+    border-radius: 10px;
+    box-shadow: var(--GENERAL-SHADOW);
+
+    background-color: white;
+}
+
+.trip-card-header-menu-option {
+    height: 50px;
+    padding: 10px;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.trip-card-header-menu-option:hover {
+    background-color: var(--SUPP-THEME-COLOR-LIGHT);
+    color: whitesmoke;
+}
 
 </style>
 

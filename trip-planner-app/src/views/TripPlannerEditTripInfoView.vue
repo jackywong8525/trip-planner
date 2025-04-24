@@ -3,11 +3,11 @@
 <div class="edit-trip-info-container">
     <div class="edit-trip-info-header">
         <div class="edit-trip-info-trip-name">
-            {{ props.trip.name }}
+            {{ props.activeTrip.name }}
         </div>
         <div    
             class="edit-trip-info-trip-created-date">
-            created at {{ props.trip.createdAt.slice(0, 10) }}
+            created at {{ props.activeTrip.createdAt.slice(0, 10) }}
         </div>
     </div>
     <div class="edit-trip-info-content">
@@ -18,7 +18,7 @@
             Location: 
         </div>
         <div class="edit-trip-info-trip-location-value">
-            {{ props.trip.location }}
+            {{ props.activeTrip.location }}
         </div>
         <div class="edit-trip-info-trip-date-label">
             <img 
@@ -27,7 +27,7 @@
             Date:
         </div>
         <div class="edit-trip-info-trip-date-value">
-            {{ props.trip.startDate }} - {{ props.trip.endDate }}
+            {{ props.activeTrip.startDate }} - {{ props.activeTrip.endDate }}
         </div>
         <div class="edit-trip-info-trip-people-label">
             <img 
@@ -45,31 +45,40 @@
 
 <script setup>
 
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, inject } from 'vue';
 import { loadTripPeople } from '@/utils/Trip';
+import AuthService from '@/auth/AuthService';
 
+const $bus = inject('$bus');
+
+const activeUser = ref({});
 const tripPeople = ref(['you']);
 const tripPeopleString = computed(() => {
     return tripPeople.value.join(', ');
 })
 
 const props = defineProps({
-    trip: {
-        type: Object,
-        required: true
-    },
-    activeUser: {
+    activeTrip: {
         type: Object,
         required: true
     }
 })
 
 onMounted(async () => {
-    const usernames = await loadTripPeople(props.trip, props.activeUser);
+    await getActiveUser();
+    await setTripPeople();
+})
+
+async function getActiveUser(){
+    activeUser.value = await AuthService.getCurrentUserInfo();
+}
+
+async function setTripPeople(){
+    const usernames = await loadTripPeople(props.activeTrip, activeUser.value);
     if(usernames.length > 0){
         tripPeople.value.push(...usernames);
     }
-});
+}
 
 </script>
 
