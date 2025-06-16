@@ -29,6 +29,7 @@ $bus.$on('switch-page', switchPage);
 $bus.$on('emit-alert', showAlert);
 
 onMounted(async () => {
+    console.log("getActiveUser()")
     await getActiveUser();
 })
 

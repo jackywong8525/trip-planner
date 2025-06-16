@@ -2,12 +2,12 @@
     <div class="trip-card-container">
         <div class="trip-card" :class="{'disabled-card': props.isPending}">
             <div 
-                class="trip-card-header"
-                @click.stop="toggleHeaderMenu">
-                <!-- click.stop: Prevent parent event being triggered -->
+                class="trip-card-header">
                 <img 
                     src="/icons/dot-menu-icon.png"
-                    class="trip-card-header-menu-button">
+                    class="trip-card-header-menu-button"
+                    @click.stop="toggleHeaderMenu">
+                    <!-- click.stop: Prevent parent event being triggered -->
                 <div
                     class="trip-card-header-menu"
                     v-if="isHeaderMenuOpen">
