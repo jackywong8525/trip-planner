@@ -2,6 +2,7 @@
     <div class="edit-trip-checklist-container">
         <ChecklistCategory
             v-for="(category, index) in categories"
+            :id="`checklist-category-${index}`"
             :category-index="index"
             @drop="onDrop($event, index)"
             @dragenter.prevent
@@ -9,14 +10,17 @@
         >
             <ChecklistItems
                 v-for="(item, itemIndex) in checklistItems.filter(item => item.categoryIndex === index)"
-                :id="item.id"
+                :itemId="item.id"
                 v-model:name="item.name"
                 v-model:deadline="item.deadline"
                 v-model:status="item.status"
                 :category-index="item.categoryIndex"
                 @dragstart="dragChecklistItem($event, item)"
+                @dragend="onDragend"
+                @drag="onDrag"
                 :key="item.id"
                 draggable="true"
+                :id="`checklist-item-${item.id}`"
             ></ChecklistItems>
         </ChecklistCategory>
 
@@ -47,7 +51,7 @@ import { ref, inject } from 'vue';
 // Variables
 const categories = ref([]);
 const checklistItems = ref([]);
-
+const isDragging = ref(false);
 
 // Props
 const props = defineProps({
@@ -115,13 +119,13 @@ function updateChecklistItemDeadline(updatedItem) {
 }
 
 function updateChecklistItemStatus(updatedItem) {
-    if(status === '') return;
+    if(updatedItem.status === '') return;
 
     checklistItems.value = checklistItems.value.map(item => {
-        if(item.id === status.id) {
+        if(item.id === updatedItem.id) {
             return {
                 ...item,
-                status: status.status
+                status: updatedItem.status
             };
         }
         return item;
@@ -174,17 +178,67 @@ function dragChecklistItem(event, item) {
     
     // Set the data to be transferred
     event.dataTransfer.setData('itemId', item.id.toString());
+
+    // Set the dragged item's opacity 
+    const draggedItem = document.getElementById(`checklist-item-${item.id}`);
+    draggedItem.style.opacity = '0.2';
+
+    // Set a hidden drag image and its style
+    let hideDragImage = draggedItem.cloneNode(true);
+    hideDragImage.id = "hideDragImage-hide";
+    hideDragImage.style.opacity = 0;
+
+    // Set a visible drag image
+    let dragImage = draggedItem.cloneNode(true);
+    dragImage.id = "dragImage";
+    dragImage.style.position = 'absolute';
+    dragImage.style.opacity = '1';
+    dragImage.style.pointerEvents = 'none'; // Avoid interaction disruption
+    dragImage.style.left = `${event.pageX}px`;
+    dragImage.style.top = `${event.pageY}px`;
+    dragImage.style.width = `${draggedItem.offsetWidth}px`;
+    dragImage.style.backgroundColor = 'white';
+
+    // Append the drag images to the body
+    document.body.appendChild(hideDragImage);
+    document.body.appendChild(dragImage);
+
+    // Set the hidden drag image using setDragImage
+    event.dataTransfer.setDragImage(hideDragImage, 0, 0);
+
+
+    isDragging.value = true;
+}
+
+function onDragend() {
+    isDragging.value = false;
+
+    const hideDragImage = document.getElementById('hideDragImage-hide');
+    const dragImage = document.getElementById('dragImage');
+
+    // Remove the drag images from the DOM
+    if (hideDragImage) {
+        hideDragImage.remove();
+    }
+    
+    if (dragImage) {
+        dragImage.remove();
+    }
+}
+
+function onDrag(event) {
+    if (isDragging.value) {
+        const dragImage = document.getElementById('dragImage');
+        if (dragImage) {
+            // Update the position of the drag image to follow the cursor
+            dragImage.style.left = `${event.pageX}px`;
+            dragImage.style.top = `${event.pageY}px`;
+        }
+    }
 }
 
 function onDrop(event, categoryIndex){
     const itemId = event.dataTransfer.getData('itemId');
-    // const item = checklistItems.value.find(item => item.id === parseInt(itemId));
-    
-    // if (item) {
-    //     item.categoryIndex = categoryIndex;
-    //     checklistItems.value = [...checklistItems.value];
-    //     console.log(checklistItems.value);
-    // }
 
     const index = checklistItems.value.findIndex(item => item.id === parseInt(itemId));
     
@@ -199,6 +253,11 @@ function onDrop(event, categoryIndex){
         console.log(checklistItems.value);
     }
 
+    isDragging.value = false;
+
+    // Reset the opacity of the dragged item
+    const draggedItem = document.getElementById(`checklist-item-${itemId}`);
+    draggedItem.style.opacity = '1';
 }
 
 </script>

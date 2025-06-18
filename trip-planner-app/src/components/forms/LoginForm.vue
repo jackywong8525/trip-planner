@@ -143,15 +143,15 @@ export default {
     /* Display */
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
     flex: 1;
 
     /* Box and Size Properties */
     min-width: 350px;
     max-width: min(60vw, 450px);
-    height: clamp(350px, 50dvh, 450px);
-    padding: 10px;
+    height: clamp(400px, 50dvh, 450px);
+    padding: 20px;
 
     /* COLOR */
     background-color: var(--MAIN-THEME-COLOR);
@@ -169,7 +169,7 @@ export default {
     color: var(--MAIN-FONT-COLOR);
 
     /* Box and Size Properties */
-    margin: 10px;
+    margin: 10px 0px 0px 0px;
 }
 
 .login-form {
@@ -183,7 +183,7 @@ export default {
     justify-content: space-around;
 
     /* Size and Box Properties */
-    min-height: 30dvh;
+    min-height: clamp(225px, 30dvh, 250px);
     width: clamp(200px, 25vw, 250px);
 }
 
@@ -194,7 +194,7 @@ export default {
 
     /* Box and Size Properties */
     padding: 10px 0px;
-    margin: 10px 5px;
+    /* margin: 10px 5px; */
 }
 
 .register-link {

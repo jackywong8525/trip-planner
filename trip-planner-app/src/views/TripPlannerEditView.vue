@@ -155,10 +155,12 @@ async function getActiveUser(){
 }
 
 .trip-planner-edit-view-container {
-    min-height: 70dvh;
+    min-height: calc(100dvh - 208px);
     border-radius: 10px;
     box-shadow: var(--GENERAL-SHADOW);
     margin: 10px;
+    position: relative;
+    
 }
 
 
