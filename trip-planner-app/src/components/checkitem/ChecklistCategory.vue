@@ -6,15 +6,16 @@
             <div class="checklist-category-name-container">
                 <input 
                     class="checklist-category-name-editable"
-                    v-model="inputValue"
+                    :value="props.categoryName"
                     placeholder="Category"
+                    @input="updateCategoryName($event.target.value)"
                     @keydown="toggleEditableByShortcut"
                     v-if="isEditable">
                 <span 
                     class="checklist-category-name"
                     v-else
                     @click.prevent="toggleEditableByShortcut">
-                    {{ inputValue }}
+                    {{ props.categoryName }}
                 </span>
             </div>
 
@@ -49,27 +50,35 @@ import { ref, inject } from 'vue';
 const $bus = inject('$bus');
 
 const isEditable = ref(true);
-const inputValue = ref('');
 
 const props = defineProps({
+    categoryName: {
+        type: String,
+        required: true
+    },
     categoryIndex: {
         type: Number,
         required: true
     }
 });
 
+function updateCategoryName(newName){
+    if(newName === '') return;
+
+    $bus.$emit('update-checklist-category', {
+        index: props.categoryIndex,
+        name: newName
+    });
+};
+
 function toggleEditableByShortcut(event){
 
 
     if(event.key === "Enter"){
 
-        if(inputValue.value === '') return;
+        if(props.categoryName === '') return;
 
         isEditable.value = false;
-        $bus.$emit('update-checklist-category', {
-            index: props.categoryIndex,
-            name: inputValue.value
-        });
         return;
     }
 
@@ -79,16 +88,9 @@ function toggleEditableByShortcut(event){
 
 function toggleEditable() {
 
-    if(inputValue.value === '') return;
+    if(props.categoryName === '') return;
 
     isEditable.value = !isEditable.value;
-
-    if(!isEditable.value){
-        $bus.$emit('update-checklist-category', {
-            index: props.categoryIndex,
-            name: inputValue.value
-        });
-    }
 }
 </script>
 

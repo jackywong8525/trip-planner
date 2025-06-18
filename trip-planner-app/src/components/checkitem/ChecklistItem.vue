@@ -74,7 +74,7 @@ const $bus = inject('$bus');
 
 const props = defineProps({
     itemId: {
-        type: Number,
+        type: String,
         required: true
     },
     name: {

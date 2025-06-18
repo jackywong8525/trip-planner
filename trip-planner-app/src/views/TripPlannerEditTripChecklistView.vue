@@ -2,7 +2,8 @@
     <div class="edit-trip-checklist-container">
         <ChecklistCategory
             v-for="(category, index) in categories"
-            :id="`checklist-category-${index}`"
+            :key="category.id"
+            v-model:category-name="category.name"
             :category-index="index"
             @drop="onDrop($event, index)"
             @dragenter.prevent
@@ -46,6 +47,7 @@
 import ChecklistCategory from '@/components/checkitem/ChecklistCategory.vue';
 import ChecklistItems from '@/components/checkitem/ChecklistItem.vue';
 import { ref, inject } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 
 
 // Variables
@@ -72,11 +74,15 @@ $bus.$on('update-checklist-item-deadline', updateChecklistItemDeadline);
 $bus.$on('update-checklist-item-status', updateChecklistItemStatus);
 
 function addCategory() {
-    categories.value.push('Category');
+    categories.value.push({
+        id: uuidv4(),
+        name: 'Category'
+    });
 }
 
 function setCategory(category) {
-    categories[category.index] = category.name;
+    categories.value[category.index].name = category.name;
+    console.log(categories.value[category.index]);
 }
 
 function refreshChecklistItems() {
@@ -141,7 +147,7 @@ function addChecklistItem() {
     }
     
     checklistItems.value.push({
-        id: checklistItems.value.length + 1,
+        id: uuidv4(),
         name: 'Item',
         deadline: '',
         status: 'Unpacked',
@@ -177,7 +183,7 @@ function dragChecklistItem(event, item) {
     event.dataTransfer.effectAllowed = 'move';
     
     // Set the data to be transferred
-    event.dataTransfer.setData('itemId', item.id.toString());
+    event.dataTransfer.setData('itemId', item.id);
 
     // Set the dragged item's opacity 
     const draggedItem = document.getElementById(`checklist-item-${item.id}`);
@@ -240,7 +246,7 @@ function onDrag(event) {
 function onDrop(event, categoryIndex){
     const itemId = event.dataTransfer.getData('itemId');
 
-    const index = checklistItems.value.findIndex(item => item.id === parseInt(itemId));
+    const index = checklistItems.value.findIndex(item => item.id === itemId);
     
     if (index !== -1) {
         const item = checklistItems.value[index];
