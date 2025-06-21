@@ -72,6 +72,8 @@ $bus.$on('update-checklist-item', setItem);
 $bus.$on('update-checklist-item-name', updateChecklistItemName);
 $bus.$on('update-checklist-item-deadline', updateChecklistItemDeadline);
 $bus.$on('update-checklist-item-status', updateChecklistItemStatus);
+$bus.$on('delete-checklist-category', deleteCategory);
+$bus.$on('delete-checklist-item', deleteChecklistItem);
 
 function addCategory() {
     categories.value.push({
@@ -82,7 +84,24 @@ function addCategory() {
 
 function setCategory(category) {
     categories.value[category.index].name = category.name;
-    console.log(categories.value[category.index]);
+}
+
+function deleteCategory(index) {
+    // Remove the category from the categories array
+    categories.value.splice(index, 1);
+
+    // Remove all checklist items associated with this category
+    checklistItems.value = checklistItems.value.filter(item => item.categoryIndex !== index);
+
+    // Update the categoryIndex of remaining checklist items
+    checklistItems.value = checklistItems.value.map(item => {
+        if (item.categoryIndex > index) {
+            return { ...item, categoryIndex: item.categoryIndex - 1 };
+        }
+        return item;
+    });
+
+    refreshChecklistItems();
 }
 
 function refreshChecklistItems() {
@@ -92,7 +111,6 @@ function refreshChecklistItems() {
 function updateChecklistItemName(updatedItem) {
     if(updatedItem.name === '') return;
 
-    console.log('updateName called with:', updatedItem);
 
     checklistItems.value = [...checklistItems.value.map(item => {
         if(updatedItem.id === item.id) {
@@ -105,7 +123,6 @@ function updateChecklistItemName(updatedItem) {
     })];
 
     refreshChecklistItems();
-    console.log(checklistItems.value);
 }
 
 function updateChecklistItemDeadline(updatedItem) {
@@ -153,8 +170,6 @@ function addChecklistItem() {
         status: 'Unpacked',
         categoryIndex: categories.value.length - 1
     })
-
-    console.log(checklistItems.value);
 }
 
 function setItem(item){
@@ -169,10 +184,20 @@ function setItem(item){
             categoryIndex: item.categoryIndex
         };
     }
-    checklistItems.value = [...checklistItems.value];
+    refreshChecklistItems();
 
-    console.log(checklistItems.value);
+}
 
+function deleteChecklistItem(itemId) {
+    // Find the index of the item to be deleted
+    const index = checklistItems.value.findIndex(item => item.id === itemId);
+    
+    if (index !== -1) {
+        // Remove the item from the checklistItems array
+        checklistItems.value.splice(index, 1);
+        // Trigger reactivity by replacing the array
+        refreshChecklistItems();
+    }
 }
 
 function dragChecklistItem(event, item) {
@@ -250,13 +275,15 @@ function onDrop(event, categoryIndex){
     
     if (index !== -1) {
         const item = checklistItems.value[index];
+
+        console.log(checklistItems.value[index])
+
         checklistItems.value[index] = {
             ...item,
             categoryIndex: categoryIndex
         };
         // This replacement triggers reactivity properly
         checklistItems.value = [...checklistItems.value];
-        console.log(checklistItems.value);
     }
 
     isDragging.value = false;

@@ -29,7 +29,7 @@
             <div class="checklist-category-delete-icon-container">
                 <i 
                     class="pi pi-trash checklist-category-delete-icon" 
-                    @click.prevent=""
+                    @click.prevent="deleteCategory"
                 ></i>
             </div>
 
@@ -49,8 +49,6 @@ import { ref, inject } from 'vue';
 
 const $bus = inject('$bus');
 
-const isEditable = ref(true);
-
 const props = defineProps({
     categoryName: {
         type: String,
@@ -61,6 +59,8 @@ const props = defineProps({
         required: true
     }
 });
+
+const isEditable = ref(props.categoryName === '');
 
 function updateCategoryName(newName){
     if(newName === '') return;
@@ -91,6 +91,10 @@ function toggleEditable() {
     if(props.categoryName === '') return;
 
     isEditable.value = !isEditable.value;
+}
+
+function deleteCategory() {
+    $bus.$emit('delete-checklist-category', props.categoryIndex);
 }
 </script>
 

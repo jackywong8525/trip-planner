@@ -19,6 +19,14 @@
             </span>
         </div>
 
+        <div class="checklist-item-quantity-container">
+            <input
+                class="checklist-item-quantity-editable"
+                min="1"
+                type="number"
+            >
+        </div>
+
         <div class="checklist-item-deadline-container">
             <i 
                 class="pi pi-calendar checklist-item-deadline-icon"
@@ -40,14 +48,19 @@
                 <option value="Packed">Packed</option>
                 <option value="In Transit">In Transit</option>
             </select> -->
-            <VSelect
+            <!-- <VSelect
                 class="checklist-item-status"
                 :value="props.status"
                 label="Select"
                 :options="['Unpacked', 'Packed', 'Pending']"
                 variant="solo-filled"
                 @input="updateStatus($event)"
-            ></VSelect>
+            ></VSelect> -->
+            <DropdownSelect
+                :option-type="ChecklistItemStatus"
+                :value="props.status"
+                :update-event="'update-checklist-item-status-value'"
+            ></DropdownSelect>
         </div>
 
         <div class="checklist-item-name-edit-icon-container">
@@ -60,7 +73,7 @@
         <div class="checklist-item-delete-icon-container">
             <i 
                 class="pi pi-trash checklist-item-delete-icon" 
-                @click.prevent=""
+                @click.prevent="deleteChecklistItem"
             ></i>
         </div>
     </div>
@@ -68,9 +81,12 @@
 
 <script setup>
 import { ref, inject } from 'vue';
-import VSelect from 'vue-select';
+import DropdownSelect from '@/components/select/DropdownSelect.vue'
+import { ChecklistItemStatus } from './ChecklistItemStatus';
 
 const $bus = inject('$bus');
+
+$bus.$on('update-checklist-item-status-value', updateStatus)
 
 const props = defineProps({
     itemId: {
@@ -95,15 +111,9 @@ const props = defineProps({
     }
 });
 
-const isEditable = ref(true);
-
-// const inputValue = ref('');
-// const deadline = ref('');
-// const status = ref('Unpacked');
-
+const isEditable = ref(props.name === '');
 
 function updateName(newName) {
-    // if(newName === '') return;
 
     $bus.$emit('update-checklist-item-name', {
         id: props.itemId,
@@ -120,12 +130,14 @@ function updateDeadline(newDeadline) {
     });
 }
 
-function updateStatus(newStatus) {
-    if(newStatus === '') return;
+function updateStatus({value}) {
+    if(value === '') return;
+
+    console.log(value)
 
     $bus.$emit('update-checklist-item-status', {
         id: props.itemId,
-        status: newStatus
+        status: value
     });
 }
 
@@ -136,13 +148,6 @@ function toggleEditableByShortcut(event){
         if(event.target.value === '') return;
 
         isEditable.value = false;
-        // $bus.$emit('update-checklist-item', {
-        //     id: props.item.id,
-        //     name: inputValue.value,
-        //     deadline: deadline.value,
-        //     status: status.value,
-        //     categoryIndex: props.item.categoryIndex
-        // });
         return;
     }
 
@@ -156,15 +161,11 @@ function toggleEditable(event) {
 
     isEditable.value = !isEditable.value;
 
-    if(!isEditable.value){
-        // $bus.$emit('update-checklist-item', {
-        //     id: props.item.id,
-        //     name: inputValue.value,
-        //     deadline: deadline.value,
-        //     status: status.value,
-        //     categoryIndex: props.item.categoryIndex
-        // });
-    }
+}
+
+
+function deleteChecklistItem() {
+    $bus.$emit('delete-checklist-item', props.itemId);
 }
 </script>
 
@@ -176,9 +177,8 @@ function toggleEditable(event) {
     margin: 10px;
 
     display: grid;
-    grid-template-columns: 1fr 120px 200px 40px 40px;
-    grid-template-areas: "item-name item-deadline item-status item-edit-icon item-delete-icon";
-    column-gap: 10px;
+    grid-template-columns: 1fr 100px 120px 200px 40px 40px;
+    grid-template-areas: "item-name item-quantity item-deadline item-status item-edit-icon item-delete-icon";
 
     border-radius: 10px;
     box-shadow: var(--GENERAL-SHADOW);
@@ -190,6 +190,10 @@ function toggleEditable(event) {
 
 .checklist-item-name-container {
     grid-area: item-name;
+}
+
+.checklist-item-quantity-container {
+    grid-area: item-quantity;
 }
 
 .checklist-item-deadline-container {
@@ -209,6 +213,7 @@ function toggleEditable(event) {
 }
 
 .checklist-item-name-container,
+.checklist-item-quantity-container,
 .checklist-item-deadline-container,
 .checklist-item-status-container,
 .checklist-item-name-edit-icon-container,
@@ -216,10 +221,13 @@ function toggleEditable(event) {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    margin: 0px 10px;
 }
 
 .checklist-item-name-editable,
 .checklist-item-name,
+.checklist-item-quantity-editable,
 .checklist-item-deadline-editable,
 .checklist-item-deadline {
 
@@ -232,6 +240,15 @@ function toggleEditable(event) {
     height: 90%;
     width: 100%;
     padding: 0px 5px;
+}
+
+.checklist-item-quantity-container {
+    padding: 0px 15px;
+}
+
+.checklist-item-quantity-editable {
+    border: 1px solid var(--SUPP-THEME-COLOR-DARK);
+    border-radius: 5px;
 }
 
 .cheacklist-item-status-container {
